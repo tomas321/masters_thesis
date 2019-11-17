@@ -1,0 +1,41 @@
+---
+
+- hosts: localhost
+  roles:
+    - role: ansible-kvm
+      vars:
+        kvm_config: false
+        kvm_config_users: false
+        kvm_allow_root_ssh: false
+        kvm_config_storage_pools: false
+        kvm_manage_vms: false
+        kvm_enable_system_tweaks: false
+        kvm_disable_apparmor: false
+        kvm_config_virtual_networks: true
+        kvm_virtual_networks:
+          # - name: default
+          #   state: inactive
+          # - name: management
+          #   state: inactive
+          - name: ovs-network
+            mode: bridge
+            bridge_name: ovsbr0  # prerequisite is to add ovs bridge via 'ovs-vsctl add-br ovsbr0'
+            autostart: false
+            state: present
+            virtualport_type: openvswitch
+            vlans:  # creates <portgroup> elements
+              # - name: vlan-1
+              #   default: true  # FEATURE REQUEST
+              - name: vlan-2
+                trunk: false
+                vlan: 2
+              - name: vlan-3
+                trunk: false
+                vlan: 3
+              - name: vlan-all
+                trunk: true
+                vlan:
+                  - 2
+                  - 3
+
+# based on https://blog.scottlowe.org/2012/11/07/using-vlans-with-ovs-and-libvirt/
