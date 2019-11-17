@@ -4,3 +4,6 @@
 [submodule "ansible/roles/ansible-config-interfaces"]
 	path = ansible/roles/ansible-config-interfaces
 	url = https://github.com/tomas321/ansible-config-interfaces.git
+[submodule "ansible/roles/ansible-openvswitch"]
+	path = ansible/roles/ansible-openvswitch
+	url = https://github.com/tomas321/ansible-openvswitch.git
