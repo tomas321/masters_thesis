@@ -1,0 +1,87 @@
+---
+
+# - hosts: localhost
+#   vars:
+#     distro: ubuntu/bionic/amd64
+#     container_name: test-container
+#   tasks:
+#     - name: Create a started container
+#       lxd_container:
+#         name: "{{ container_name }}"
+#         state: started
+#         source:
+#           type: image
+#           mode: pull
+#           server: https://images.linuxcontainers.org
+#           protocol: simplestreams
+#           alias: "{{ distro }}"
+#         profiles: ["default"]
+#         wait_for_ipv4_addresses: true
+#         timeout: 600
+#       register: lxd_info
+#     - name: add {{ container_name }} host
+#       add_host:
+#         name: "{{ container_name }}"
+#         ansible_connection: lxd
+#         ansible_python_interpreter: /usr/bin/python3
+#         groups:
+#           - test-container
+
+- hosts: localhost
+  pre_tasks:
+    - name: install ifupdown
+      become: true
+      apt:
+        name: ifupdown
+  roles:
+    - role: ansible-config-interfaces
+      vars:
+        config_network_bonds: false
+        config_network_bridges: true
+        config_network_interfaces: true  # master bool value to configure all network and OVS objects
+        config_network_vlans: true
+        config_ovs_bonds: false
+        config_ovs_bridges: false
+        config_ovs_interfaces: false
+        network_bridges:
+          - name: mybr0
+            comment: my switch
+            configure: true
+            enable: true
+            method: static
+            address: '10.0.0.1'
+            netmask: '255.255.255.0'
+            netmask_cidr: 24
+            ports:
+              - tap1
+              - tap2
+        network_interfaces:
+          - name: tap1
+            comment: VLAN 100
+            configure: true
+            enable: true
+            method: manual
+            parameters:
+              - param: pre-up
+                val: ip tuntap add name tap1 mode tap
+          - name: tap2
+            comment: VLAN 200
+            configure: true
+            enable: true
+            method: manual
+            parameters:
+              - param: pre-up
+                val: ip tuntap add name tap2 mode tap
+        network_vlans:
+          - name: tap1.100
+            configure: true
+            enable: true
+            comment: VLAN 100
+            method: manual
+            vlan_device: tap1
+          - name: tap2.200
+            configure: true
+            enable: true
+            comment: VLAN 200
+            method: manual
+            vlan_device: tap2
