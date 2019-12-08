@@ -1,1 +1,8 @@
 ansible/misc
+
+# latex gitignore
+**/latex/**/*.aux
+**/latex/**/*.log
+**/latex/**/*.out
+**/latex/**/*.gz
+**/latex/**/*.toc
