@@ -6,3 +6,5 @@ ansible/misc
 **/latex/**/*.out
 **/latex/**/*.gz
 **/latex/**/*.toc
+**/latex/**/*.bbl
+**/latex/**/*.blg
