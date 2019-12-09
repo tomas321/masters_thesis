@@ -1,43 +1,4 @@
-## STU - FIIT
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Immutable infrastructures for security demanding environments - Aim of research
-
-## Tomáš Belluš
-
-### Supervised by: Tibor Csóka
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Motivation
 
@@ -121,3 +82,13 @@ https://kth.diva-portal.org/smash/get/diva2:1231856/FULLTEXT02.pdf
 https://www.enisa.europa.eu/publications/proactive-detection-of-security-incidents-II-honeypots
 
 https://www.sumologic.com/insight/mutable-immutable-infrastructure/
+
+https://www.researchgate.net/publication/285598988_Adaptive_and_Flexible_Virtual_Honeynet
+
+https://link.springer.com/chapter/10.1007%2F978-3-030-01171-0_21
+
+https://digitalcommons.calpoly.edu/cgi/viewcontent.cgi?article=3389&context=theses
+
+https://ieeexplore.ieee.org/abstract/document/1495930
+
+https://repository.stcloudstate.edu/cgi/viewcontent.cgi?article=1011&context=msia_etds
