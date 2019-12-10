@@ -3,7 +3,7 @@
 \usepackage[english]{babel}
 \usepackage{indentfirst}
 % \usepackage{enumitem}
-% \usepackage{pdfpages}
+\usepackage{pdfpages}
 
 
 \usepackage{listings}
@@ -57,17 +57,17 @@
 \include{preamble/title}
 
 %assignment
-\thispagestyle{empty}
+%\thispagestyle{empty}
 
-% TODO: must be included !!!
-% \includepdf[pages=-]{preamble/dp_zadanie.pdf}
+\includepdf[pages=-]{preamble/dp_zadanie.pdf}
 
-\newpage{}\thispagestyle{empty}
+%\newpage{}
+%\thispagestyle{empty}
 
-\newpage
-\thispagestyle{empty}
-\mbox{}
-\newpage
+%\newpage
+%\thispagestyle{empty}
+%\mbox{}
+%\newpage
 
 % table of contents
 \begingroup
@@ -151,16 +151,19 @@ A particularly interesting topic is to \emph{detect zero-day vulnerabilities} in
 
 \section{Research questions}\label{research-questions}
 
-How to improve virtualization/emulation detection in a honeypot or a
-sandbox?
+How to improve virtualization/emulation detection in a honeynet/sandbox?
 
 What is the most detectable phase in the Cyber Kill Chain?
 
 The underlying technology for virtualization and containerization (if any) is crucial to reach immutability. What provisioning and orchestration mechanisms are needed to ensure an immutable infrastructure?
 
+What is the best practice of implementing a system for observing a malicious actor?
+
+How to design a deception mechanism baiting the malicious actor to believe in production-like attribution of the system.
+
 \subsection{Thesis goal}\label{thesis-goal}
 
-Design a honeypot or a sandbox, in Linux, as a dynamic analytic tool dedicated to detecting zero-day vulnerabilities and mitigating detection. Utilize the state-of-the-art infrastructure deployment and orchestration paradigms to ensure automated and a secure system. Mitigating escape attacks will not be in scope of this thesis, but the introduced segmentation technique will be taken into account to segregate related services.
+Design a honeynet, in Linux, as a dynamic analytic tool dedicated to observing the activity of a malicious actor. Utilize the state-of-the-art infrastructure deployment and orchestration paradigms to ensure automated and a secure system. Mitigating escape attacks will not be in scope of this thesis, but the introduced segmentation technique will be taken into account to segregate related services.
 
 \subsection{Plan of work}\label{plan-of-work}
 
@@ -168,26 +171,22 @@ Design a honeypot or a sandbox, in Linux, as a dynamic analytic tool dedicated t
 
 \begin{itemize}
 \item
-  analyze virtualization (e.g KVM), emulation and virtualization
-  detection mitigation practices
+  analyze virtualization (e.g KVM), emulation and virtualization detection mitigation practices
 \item
   analyze cross-platform orchestration and provisioning mechanisms
 \item
-  comparison of existing solutions and discussion of possible
-  improvements
+  comparison of existing solutions and discussion of possible improvements
 \item
-  design of ensuring immutability and the whole stack of the system
-  supported by analysis
+  design of the whole stack of the system supported by analysis
 \end{itemize}
 
 \subsubsection{DP II}\label{dp-ii}
 
 \begin{itemize}
 \item
-  discuss possible attack vectors meant for monitoring
+  discuss observable attack vectors
 \item
-  implementation of the system skeleton and configuration of the
-  orchestartion mechanism
+  implementation of the system skeleton and configuration of the orchestartion mechanism
 
   \begin{itemize}
   \item
@@ -198,14 +197,14 @@ Design a honeypot or a sandbox, in Linux, as a dynamic analytic tool dedicated t
 \item
   document the implementation
 \item
-  assignment revision of necessary
+  assignment revision if necessary
 \end{itemize}
 
 \subsubsection{DP III}\label{dp-iii}
 
 \begin{itemize}
 \item
-  test honeypot implementation on live server
+  test honeynet implementation on live server
 \item
   analyze all retrieved data and indicators of compromise
 \item
@@ -217,20 +216,20 @@ Design a honeypot or a sandbox, in Linux, as a dynamic analytic tool dedicated t
 \chapter{Further Literature}\label{further-literature}
 
 \begin{enumerate}
-	\item paper about \emph{Zero-Day Attack Signatures Detection Using Honeypot} \url{https://pdfs.semanticscholar.org/d4e4/5e81b8d8878ca99648c3fc890ede1ae01b49.pdf}
+	\item paper on \emph{Zero-Day Attack Signatures Detection Using Honeypot} \url{https://pdfs.semanticscholar.org/d4e4/5e81b8d8878ca99648c3fc890ede1ae01b49.pdf}
 	
-	\item thesis about \emph{Docker and Kubernetes in high security environments} \url{https://kth.diva-portal.org/smash/get/diva2:1231856/FULLTEXT02.pdf}
+	\item thesis on \emph{Docker and Kubernetes in high security environments} \url{https://kth.diva-portal.org/smash/get/diva2:1231856/FULLTEXT02.pdf}
 	
-	\item paper about \emph{Adaptive and Flexible Virtual Honeynet}
+	\item paper on \emph{Adaptive and Flexible Virtual Honeynet}
 	\url{https://www.researchgate.net/publication/285598988_Adaptive_and_Flexible_Virtual_Honeynet}
 	
-	\item conference paper about \emph{Automated Configuration of Monitoring Systems in an Immutable Infrastructure} \url{https://link.springer.com/chapter/10.1007%2F978-3-030-01171-0_21}
+	\item conference paper on \emph{Automated Configuration of Monitoring Systems in an Immutable Infrastructure} \url{https://link.springer.com/chapter/10.1007%2F978-3-030-01171-0_21}
 		
-	\item thesis on \emph{Dynamic shifting of virtual network topologies fornetwork attack prevention} \url{https://digitalcommons.calpoly.edu/cgi/viewcontent.cgi?article=3389&context=theses}
+	\item thesis on \emph{Dynamic shifting of virtual network topologies for network attack prevention} \url{https://digitalcommons.calpoly.edu/cgi/viewcontent.cgi?article=3389&context=theses}
 	
 	\item paper on \emph{Detecting honeypots and other suspicious environments} \url{https://ieeexplore.ieee.org/abstract/document/1495930}
 	
-	\item thesis on \emph{Design and Implementation of a Real-TimeHoneypot System for the Detection andPrevention of Systems Attacks} \url{https://repository.stcloudstate.edu/cgi/viewcontent.cgi?article=1011&context=msia_etds}
+	\item thesis on \emph{Design and Implementation of a Real-Time Honeypot System for the Detection and Prevention of Systems Attacks} \url{https://repository.stcloudstate.edu/cgi/viewcontent.cgi?article=1011&context=msia_etds}
 \end{enumerate}
 
 \newpage
