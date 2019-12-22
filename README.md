@@ -10,4 +10,5 @@ The initial research overview [Latex document](./docs/initial_research/latex) re
 
 #### [KVM essentials](./docs/kvm_essentials.md)
 #### [Linux networking](./docs/linux_networking.md)
+#### [Vagrant basics](./docs/vagrant.md)
 #### [test deployment](./docs/test_deployment.md)
