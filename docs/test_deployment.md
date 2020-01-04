@@ -32,14 +32,14 @@ install command:
 virt-install --virt-type kvm --name node.kub.local --memory 8192 --cdrom ubuntu-bionic.iso --disk size=10,path=/a/b/c.qcow2 --os-variant ubuntu18.04 --cpu host --vcpus cpuset=1-2,maxvcpus=8
 ```
 
+## test deployment
+
+The test deployment of 3 VMs is included in the [Vagrantfile](../vagrant_test/Vagrantfile)
+
 ## deployment
 
-- Vagrant file:
-```ruby
-Vagrant.configure("2") do |config|
-  config.vm.box = "mai7star/ubuntu"
-  config.vm.box_version = "1804.1.0"
-end
-```
+TODO according to the above description
 
 ### networking
+
+TODO
