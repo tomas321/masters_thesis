@@ -34,12 +34,29 @@ virt-install --virt-type kvm --name node.kub.local --memory 8192 --cdrom ubuntu-
 
 ## test deployment
 
-The test deployment of 3 VMs is included in the [Vagrantfile](../vagrant_test/Vagrantfile)
+The test deployment of 3 VMs is included in the [test Vagrantfile](../vagrant_test/Vagrantfile)
+
+### networking
+Simple communication bridge isolated from the outside networks:
+```bash
+ip link add name mybr0 type bridge
+ip add add 10.0.0.1/24 dev mybr0
+ip link set dev mybr0 up
+```
 
 ## deployment
 
-TODO according to the above description
+### Networks
 
-### networking
+`vagrant-mgmt` - the vagrant management network in libvirt
+`mybr0` - isolated inter-node bridge
 
-TODO
+### IPs
+
+`m1.k8s.dev.local` - 10.0.0.10/24
+`n1.k8s.dev.local` - 10.0.0.20/24
+`n2.k8s.dev.local` - 10.0.0.21/24
+
+### Vagrant
+
+All is configured in the [k8s Vagrantfile](../vagrant_k8s/Vagrantfile), except the network bridge
