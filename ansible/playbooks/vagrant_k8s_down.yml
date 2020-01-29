@@ -1,0 +1,29 @@
+---
+
+- hosts: localhost
+  vars:
+    bridge: mybr0
+    etc_network_interfaces: |
+      auto lo
+      iface lo inet loopback
+  tasks:
+    - name: remove bridge
+      become: true
+      command: "ip link del {{ bridge }}"
+
+    - name: reset the etc_network_interfaces
+      become: true
+      copy:
+        content: "{{ etc_network_interfaces }}"
+        dest: /etc/network/interfaces
+
+    - name: restart networking
+      become: true
+      service:
+        name: networking
+        state: restarted
+
+    - name: start k8s nodes
+      command: "vagrant halt"
+      args:
+        chdir: ../../vagrant_k8s/
