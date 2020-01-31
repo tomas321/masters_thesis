@@ -1,0 +1,49 @@
+---
+
+- hosts: localhost
+  vars:
+    bridge: mybr0
+  roles:
+    - role: ansible-config-interfaces
+      vars:
+        config_network_interfaces: true
+        network_interfaces:
+          - name: "{{ bridge }}"
+            configure: true
+            enable: true
+            method: static
+            address: 10.0.0.1
+            netmask: 255.255.255.0
+            parameters:
+              - param: pre-up
+                val: "ip link add {{ bridge }} type bridge"
+
+        # OVS configuration (NOT YET compatible with vagrant linking)
+        # config_ovs_bridges: true
+        # ovs_bridges:
+        #   - name: ovs1
+        #     address: 10.0.0.1
+        #     configure: true
+        #     enable: true
+        #     method: static
+        #     netmask_cidr: 24
+        #     ports:
+        #       - ovs1p1
+        #       - ovs1p2
+        #       - ovs1p3
+        # ovs_interfaces:
+        #   - name: ovs1p1
+        #     bridge: ovs1
+        #     configure: true
+        #     enable: true
+        #     method: manual
+        #   - name: ovs1p2
+        #     bridge: ovs1
+        #     configure: true
+        #     enable: true
+        #     method: manual
+        #   - name: ovs1p3
+        #     bridge: ovs1
+        #     configure: true
+        #     enable: true
+        #     method: manual
