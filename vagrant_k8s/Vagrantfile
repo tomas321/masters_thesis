@@ -1,41 +1,48 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+#
+# configuration options: https://www.vagrantup.com/docs/vagrantfile
+
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+BOX_DISTRO = "generic/ubuntu1804"
+
+MASTER_NODE_COUNT = 1
+WORKER_NODE_COUNT = 2
+
+Vagrant.require_version ">= 2.0.0"
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "generic/ubuntu1804"
+    config.vm.box = BOX_DISTRO
     config.vm.synced_folder ".", "/vagrant", disabled: true
     config.vm.provider :libvirt do |libvirt|
         libvirt.management_network_name = "vagrant-mgmt"
         libvirt.management_network_address = "10.1.1.0/28"
     end
 
-    config.vm.define "master1" do |master1|
-        master1.vm.hostname = "m1.k8s.dev.local"
-        # static ip for master1
-        master1.vm.network :public_network,
-            :dev => "mybr0",
-            :mode => "bridge",
-            :type => "bridge",
-            :ip => "10.0.0.10"
+    # master nodes
+    (1..MASTER_NODE_COUNT).each do |i|
+        config.vm.define "master-#{i}" do |master|
+            master.vm.hostname = "m#{i}.k8s.dev.local"
+            master.vm.network :public_network,
+                :dev => "mybr0",
+                :mode => "bridge",
+                :type => "bridge",
+                :ip => "10.0.0.1#{i}"
+            master.vm.post_up_message = "Master node #{i} started"
+        end
     end
 
-    config.vm.define "node1" do |node1|
-        node1.vm.hostname = "n1.k8s.dev.local"
-        # static ip for node1
-        node1.vm.network :public_network,
-            :dev => "mybr0",
-            :mode => "bridge",
-            :type => "bridge",
-            :ip => "10.0.0.20"
-    end
-
-    config.vm.define "node2" do |node2|
-        node2.vm.hostname = "n2.k8s.dev.local"
-        # static ip for node2
-        node2.vm.network :public_network,
-            :dev => "mybr0",
-            :mode => "bridge",
-            :type => "bridge",
-            :ip => "10.0.0.21"
+    # worker nodes
+    (1..WORKER_NODE_COUNT).each do |i|
+        config.vm.define "node-#{i}" do |node|
+            node.vm.hostname = "n#{i}.k8s.dev.local"
+            node.vm.network :public_network,
+                :dev => "mybr0",
+                :mode => "bridge",
+                :type => "bridge",
+                :ip => "10.0.0.2#{i}"
+            node.vm.post_up_message = "Worker node #{i} started"
+        end
     end
 end
