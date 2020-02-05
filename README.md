@@ -25,3 +25,17 @@ This repository inlcludes Vagrant files various deployments of multiple libvirt-
 #### [Test deployment](./docs/test_deployment.md)
 
 This documents the test deployment for k8s and the applied networking.
+
+### Prerequisites
+**ansible** - `sudo pip3 install ansible`
+### Setup and installation
+
+1. Clone the repository.
+    - `git clone https://github.com/tomas321/masters_thesis`
+2. Run the Ansible [setup kvm playbook](./ansible/playbooks/setup_kvm.yml) as root.
+     - ```bash
+       cd masters_thesis/ansible
+       ansible-playbook -K playbooks/setup_kvm.yml
+       ```
+3. Run the Ansible [vagrant k8s up playbook](./ansible/playbooks/vagrant_k8s_kvm.yml) as root.
+    - `ansible-playbook -K playbooks/vagrant_k8s_up.yml`
