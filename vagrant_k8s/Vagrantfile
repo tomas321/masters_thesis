@@ -7,6 +7,7 @@ Vagrant.configure("2") do |config|
     config.vm.provider :libvirt do |libvirt|
         libvirt.management_network_name = "vagrant-mgmt"
         libvirt.management_network_address = "10.1.1.0/28"
+        # libvirt.storage_pool_name = "images"  # must be defined if the pool differs from the default
     end
 
     config.vm.define "master1" do |master1|
