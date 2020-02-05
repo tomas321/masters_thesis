@@ -1,13 +1,21 @@
 ---
 
 - hosts: localhost
+  vars:
+    custom_pool_path: "/var/lib/libvirt/k8s_images"
+  pre_tasks:
+    - name: ensure storage pool path exists
+      become: true
+      file:
+        path: "{{ custom_pool_path }}"
+        state: directory
   roles:
     - role: ansible-kvm
       vars:
         kvm_config: true
         kvm_config_storage_pools: true
         kvm_storage_pools:
-          - name: images
-            path: /var/lib/libvirt/images/
+          - name: k8s_images
+            path: "{{ custom_pool_path }}"
             autostart: true
             state: active
