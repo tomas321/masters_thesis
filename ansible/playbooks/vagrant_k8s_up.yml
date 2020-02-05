@@ -3,12 +3,16 @@
 - hosts: localhost
   vars:
     bridge: mybr0
+    dependencies:
+      - vagrant
+      - ifupdown
   pre_tasks:
     - name: install vagrant
       become: true
       package:
-        name: vagrant
+        name: "{{ item }}"
         state: present
+      loop: "{{ dependencies }}"
       tags: install
   roles:
     - role: ansible-config-interfaces
