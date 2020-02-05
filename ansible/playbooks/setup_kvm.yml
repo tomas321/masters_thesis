@@ -13,6 +13,7 @@
     - role: ansible-kvm
       vars:
         kvm_config: true
+        kvm_enable_system_tweaks: true  # resolves bridge forwarding problems
         kvm_config_storage_pools: true
         kvm_storage_pools:
           - name: k8s_images
