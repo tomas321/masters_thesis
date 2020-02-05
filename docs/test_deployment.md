@@ -62,6 +62,7 @@ ip link set dev mybr0 up
 All is configured in the [k8s Vagrantfile](../vagrant_k8s/Vagrantfile), except the network bridge
 
 ### Ansible
+Before running the below playbooks, it requires installing and setting up a KVM via [setup kvm playbook](../ansible/playbook/setup_kvm.yml).
 
 Two playbooks for starting and halting the k8s nodes:
 - [vagrant k8s up playbook](../ansible/playbooks/vagrant_k8s_up.yml)
