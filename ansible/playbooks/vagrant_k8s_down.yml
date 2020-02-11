@@ -26,4 +26,4 @@
     - name: halt k8s nodes
       command: "vagrant halt"
       args:
-        chdir: ../../vagrant_k8s/
+        chdir: ../../provisioner/vagrant/

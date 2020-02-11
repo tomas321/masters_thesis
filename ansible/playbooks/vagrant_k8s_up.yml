@@ -32,4 +32,4 @@
     - name: start k8s nodes
       command: "vagrant up"
       args:
-        chdir: ../../vagrant_k8s/
+        chdir: ../../provisioner/vagrant/
