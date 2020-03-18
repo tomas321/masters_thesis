@@ -31,6 +31,8 @@ Vagrant.configure("2") do |config|
                 :type => "bridge",
                 :ip => "10.0.0.#{i+1}"
             master.vm.post_up_message = "Master node #{i} started"
+            master.vm.provision "file", source: "~/.ssh/id_vagrant_k8s.pub", destination: "~/.ssh/id_k8s_host.pub"
+            master.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
         end
     end
 
@@ -44,6 +46,8 @@ Vagrant.configure("2") do |config|
                 :type => "bridge",
                 :ip => "10.0.0.#{i+1+MASTER_NODE_COUNT}"
             node.vm.post_up_message = "Worker node #{i} started"
+            node.vm.provision "file", source: "~/.ssh/id_vagrant_k8s.pub", destination: "~/.ssh/id_k8s_host.pub"
+            node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
         end
     end
 end
