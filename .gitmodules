@@ -7,3 +7,6 @@
 [submodule "ansible/roles/ansible-openvswitch"]
 	path = ansible/roles/ansible-openvswitch
 	url = git@github.com:tomas321/ansible-openvswitch.git
+[submodule "ansible/roles/ansible-role-latex"]
+	path = ansible/roles/ansible-role-latex
+	url = https://github.com/Provizanta/ansible-role-latex

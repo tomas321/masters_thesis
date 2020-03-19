@@ -1,0 +1,13 @@
+---
+
+- hosts: localhost
+  roles:
+    - role: ansible-role-latex
+      vars:
+        latex_package: 'extra'
+        latex_extensions:
+          - texlive-bibtex-extra
+          - texlive-extra-utils
+          - texlive-fonts-recommended
+        latex_editors:
+          - texstudio
