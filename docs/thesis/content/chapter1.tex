@@ -1,15 +1,30 @@
-\chapter{Second Chapter}
+\chapter{Analysis \label{anal}}
+This chapter introduces and characterizes malware analysis techniques (see~\autoref{anal:malware}), differentiates the analysis techniques (see~\autoref{anal:malware:dyn_stat}), outlines and describes mechanisms and environments utilized by cyber security professionals and companies (see~\autoref{anal:malware:mech_envs}), describes the virtualization technology KVM (see~\autoref{anal:virtual:kvm}) and the orchestration mechanism Kubernetes (see~\autoref{anal:virtual:k8s}).\par
 
-\say{Here, a quotation is written and even some \say{nested} quotations 
-are possible}
+\section{Malware analysis \label{anal:malware}}
 
-\lipsum
+\subsection{Dynamic and static \label{anal:malware:dyn_stat}}
 
-Figure \ref{fig:dynabook}:
+\subsection{Mechanisms and environments \label{anal:malware:mech_envs}}
 
-\begin{figure}[h]
-\begin{centering}
-\includegraphics[width=5cm]{assets/images/Dynabook}
-\par\end{centering}
-\caption{Dynabook \label{fig:dynabook}}
-\end{figure}
+\subsubsection{Honeypot and honeynet \label{anal:malware:mech_envs:hons}}
+Honeypot is a bait service, system or a even whole network (honeynet) usually hosted on public server. Its main purpose is to be scanned, attacked or compromised by the malicious actor. Every honeypot provides the desired functionality of the target resource, to mimic the production environment, leaving the malicious actor unaware of the honeypot \cite{study:enisa_honeypots}.\par
+
+Based on the ENISA honeypot study \cite{study:enisa_honeypots}, honeypots are classified from the level of interaction view and based on the attacked resource type. The Low Interaction Honeypot (LIH) provides very low availability of the host OS. Most services and application are mocked and simulated in a static environment. Everything accessible is controlled by a decoy application with absolutely minimal in-depth features (e.g. shell, configuration files, other programs etc.). LIHs are more secure for the host, but far less capable or useful for malware/attack detection and inspection.\par
+
+On the contrary, High Interaction Honeypot (HIH) is a fully responsive system with live applications and services with minimal to none emulated functionalities. It provides the attacker a wide attack surface ranking the HIH far less secure with the whole OS at the malicious actor's disposal. The idea is to make HIHs believable as possible and isolating it from production environment including virtualization \cite{blog:first_malware_analysis}.\par
+
+Honeypots are differentiated by the type of attacked resource. The server-side honeypot is the well-known honeypot with running service(s) and monitoring the activity of the server-side connections. The attacked resources are the services listening on the dedicated ports. It's main purpose is to detect and identify botnets and forced authentication/authorization attempts.\par
+
+The client-side honeypot is deployed as a user application, which utilizes the server's services. The monitored subject is the application (e.g web-browser, document editor). It's main purpose is to detect client-side attacks originating from the application (i.e. web-browser attacks via web pages and plugins).\par
+
+% TODO: maybe briefly define honeypot classifications in the footnotes and define honeypots technically in-depth
+
+
+\subsubsection{Sandbox \label{anal:malware:mech_envs:sand}}
+
+\section{Virtualization technology \label{anal:virtual}}
+
+\subsection{Kernel Virtual Machine \label{anal:virtual:kvm}}
+
+\subsection{Kubernetes \label{anal:virtual:k8s}}
