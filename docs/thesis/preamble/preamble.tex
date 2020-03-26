@@ -47,15 +47,15 @@
 
 %style=iso-numeric
 %style=authortitle-dw
-\usepackage[backend=bibtex,defernums=true]{biblatex}
+\usepackage[maxnames=1,backend=bibtex,defernums=true]{biblatex}
 \defbibheading{references}[Literature]{ 
   \chapter*{#1}
   \markboth{#1}{#1}
 }
-\defbibheading{referencessec}[Literature]{ 
-  \section*{#1}
-  \markboth{#1}{#1}
-}
+%\defbibheading{referencessec}[Literature]{ 
+%  \section*{#1}
+%  \markboth{#1}{#1}
+%}
 \bibliography{\myBibliography}
 
 
@@ -75,3 +75,4 @@
 \usepackage{afterpage}
 
 \usepackage{lipsum}
+\usepackage{hyperref}
