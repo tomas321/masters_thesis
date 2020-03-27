@@ -1,11 +1,22 @@
 \chapter{Analysis \label{anal}}
-This chapter introduces and characterizes malware analysis techniques (see~\autoref{anal:malware}), differentiates the analysis techniques (see~\autoref{anal:malware:dyn_stat}), outlines and describes mechanisms and environments utilized by cyber security professionals and companies (see~\autoref{anal:malware:mech_envs}), describes the virtualization technology KVM (see~\autoref{anal:virtual:kvm}) and the orchestration mechanism Kubernetes (see~\autoref{anal:virtual:k8s}).\par
+This chapter introduces malware analysis (see~\autoref{anal:malware}) and differentiates the techniques (see~\autoref{anal:malware:dyn_stat}), outlines and describes mechanisms and environments utilized by cyber security professionals and companies (see~\autoref{anal:malware:mech_envs}), describes the virtualization technology KVM (see~\autoref{anal:virtual:kvm}) and the orchestration mechanism Kubernetes (see~\autoref{anal:virtual:k8s}).\par
 
 \section{Malware analysis \label{anal:malware}}
+Monitoring malicious actor, sample or an entity in any environment is interchangeable from the analyst point of view. Therefore, knowing the malware analysis techniques is crucial for secure monitoring of malicious actors. Malware analysis is divided into static and dynamic with varying tools and mechanisms \cite{article:malware_analysis_techniques} \cite{research:malware_analysis_2017}.\par
 
 \subsection{Dynamic and static \label{anal:malware:dyn_stat}}
+Dynamic analysis is a process of actively monitoring, ideally in an isolated environment, the execution of a malware sample. Static analysis, as the name implies, inspects the function calls, readable strings, control and data flow of a malware sample (i.e. binary, program code).\par
 
-\subsection{Mechanisms and environments \label{anal:malware:mech_envs}}
+% DYNAMIC ANALYSIS LIMITATIONS:
+Dynamic analysis may be unsafe and devastating, unless environment or system isolation is applied, but it's more precise and bypasses the reversing of self-modified code. Even though, dynamic analysis does not explore all execution paths, there are techniques resolving this drawback (i.e. virtual machine snapshots \cite{research:malware_analysis_2017}). Furthermore, dynamic analysis in a isolated or virtualization environment is exposed to the risk of [isolation] detection \cite{medium_article:malware_analysis_sandboxing}.\par
+
+%STATIC ANALYSIS LIMITATIONS:
+Static analysis is safe [and inspects all execution paths of the binary], but may be difficult to interpret when malicious actors utilize the obfuscation, compression or encryption techniques. Advanced malware sample poses a challenge for a malware analyst due the usage of control-flow flattening \cite{report:eset_static_analysis} and other methods. It suggests that dynamic malware analysis bypasses this troublesome procedure and discloses the sample outcome or agenda. \par
+
+Manual Egele, et al. in their article \cite{article:malware_analysis_techniques} highlight the problems of static malware analysis approaches. The authors introduce multiple state-of-the-art techniques and tools dedicated to dynamic malware analysis - Function Call Monitoring, Function Parameter Analysis focusing of the final values, Information Flow Tracking, Instruction Trace and Auto start Extensibility Points (monitor startup programs, cron jobs, etc.). \par % TODO: consider more detailed explanation of the techniques
+
+\subsection{Mechanisms [and environments and tools] \label{anal:malware:mech_envs}}
+These mechanisms must provide solution to dynamic malware analysis limitations in order to effectively capture the malicious actor's agenda. It should be a robust system implying the impression of a production environment.
 
 \subsubsection{Honeypot and honeynet \label{anal:malware:mech_envs:hons}}
 Honeypot is a bait service, system or a even whole network (honeynet) usually hosted on public server. Its main purpose is to be scanned, attacked or compromised by the malicious actor. Every honeypot provides the desired functionality of the target resource, to mimic the production environment, leaving the malicious actor unaware of the honeypot \cite{study:enisa_honeypots}.\par
