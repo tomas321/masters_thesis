@@ -42,3 +42,4 @@ This documents the test deployment for k8s and the applied networking.
       ```
 4. Run the Ansible [vagrant k8s up playbook](./ansible/playbooks/vagrant_k8s_kvm.yml) as root.
     - ```ansible-playbook -K playbooks/vagrant_k8s_up.yml```
+5. Install `kubectl` on the host machine ([link](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
