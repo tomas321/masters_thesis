@@ -98,7 +98,52 @@ issue #8: existing solutions
 
 ## [study](https://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results): A distributed platform of high interaction honeypotsand experimental results
 
-TODO
+### concept
+
+- as a monitoring technique they patched the kernel's `tty` and `exec` module to intercept the keystrokes and system calls respectively
+- in a SSH scenario they created a new syscall and modified the ssh server to use it
+    - intercepting the login-password pair for the SSH server
+
+- logged data is periodically copied from the VM disk to the host disk at given time of the day
+    - the authors suggest it's a hard to identify by the attacker
+
+- after that the data is store in a database with a given structure
+    - data from each ssh login attempt
+    - data from each successful ssh connection - tty buffer content and tty name
+    - data of programs executed  with parameters and the terminal in which it ran
+    - session data grouping ssh connections
+
+**architecture**
+- 4 machines anywhere in the world working as relays to the authors' local setup of VM honyepots
+    - the VMs ensure an isolated environment with one level of virualization
+
+- the traffic incomming to the public interface of the relay, is routed to a GRE tunnel to the local VM
+
+**experiment**
+- in the period of 30 days, they monitored what are the most common log-password pairs when no accounts are created
+    - they found that for most attempts the login and password were the same
+
+- then for almost half a year they monitored the time it took the attacker to successfully login and to login with commands entered
+    - in some cases the attacker managed to get root via system vulnerab exploit
+
+- they encountered attackers changing passwords of other accounts on the system
+- they sorted their findings by country (mostly china, usa, germany, uk, russia, romania, japan, brazil, france, south korea and netherlands)
+- analyzed the intrusions and commands
+    - mostly they tried to download programs from the same country the source IP originated from
+
+- general trends of attacker behaviors:
+    - check if i am alone on the system
+    - system recon - OS name and version, processor characteristics
+    - changes the password of current user
+    - install an IP scan program and scans the IP range to recon for potential lateral movement
+    - IRC client setup for receiving instructions
+    - privilege escalation attemp
+
+- general trends of attacker behaviors (with root):
+    - change the root password
+    - setup backdoor - open another port
+    - checkout info about legitimate users of the computer via custom installed software
+    - one attacker replaced the ssh client binary
 
 ## [study](https://arxiv.org/pdf/1701.02446.pdf): SIPHON: Towards Scalable High-Interaction PhysicalHoneypots
 
