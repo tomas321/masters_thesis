@@ -145,9 +145,23 @@ issue #8: existing solutions
     - checkout info about legitimate users of the computer via custom installed software
     - one attacker replaced the ssh client binary
 
-## [study](https://arxiv.org/pdf/1701.02446.pdf): SIPHON: Towards Scalable High-Interaction PhysicalHoneypots
+## [study](https://arxiv.org/pdf/1701.02446.pdf): SIPHON: Towards Scalable High-Interaction Physical Honeypots
 
-TODO
+- IOT honeypots based on real devices
+- they assume attackers use Shodan to identify the vulnerable IOT devices
+
+**architecture**
+- physical IOT devices as th devices under attack
+- wormholes - live device on the Internet with exposed ports forwarding the traffic to the IOT devices
+- the traffic is forwarded through a proxy _Forwarder_, which can act as a gateway to all devices on one network or even as a TLS MITM
+- finally it consists of a storage and analysis unit
+
+**compromise countermeasures**
+- periodic resets
+- ips e.g. suricata
+- iot specific low-level instrumentation connections (e.g. JTAG)
+
+TODO: continue on chapter 4
 
 
 # NOTES
