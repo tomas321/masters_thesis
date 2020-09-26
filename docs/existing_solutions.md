@@ -198,6 +198,36 @@ issue #8: existing solutions
     - deception technology is a state of the art approach to discover an attacker's agenda and prevent all potential negative scenarios [another darkreading blog](https://www.darkreading.com/threat-intelligence/deception-technology-prevention-reimagined-/a/d-id/1330408?piddl_msgid=330023)
 - its not imporatant to collect all low-end data such as packet capture to detect an attacker presence and take action [brent huston, podcast](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share)
 
+### article [How deception can change cyber security defences](https://www.sciencedirect.com/science/article/pii/S1361372319300089)
+
+- "Deception technology has evolved and improved far beyond the honeypot  concept. Today, deception  is about being active in terms of luring and bait-ing attackers to a deception environment" - validates the need for my thesis as such
+- the may goal of deception tech is to know what the attacker could be looking for and bait them with decoys
+    - these decoys are not to be engaged with, and if so, most probably it's a malicious actor
+    - it seam though that the a deception is not in a isolated environment but, coexisting in the productino environment of an organization
+    - assumes to solve false positives
+    - used for post-breach detection
+
+- deception technology assumes to solve the long presence of attackers in the network (which is measured in months)
+- the author proposes that "early detection is now more critical than ever".
+
+### honeypot deception tactics [link](https://link.springer.com/chapter/10.1007/978-3-030-02110-8_3)
+
+it's a chapter, citation: `Rowe N.C. (2019) Honeypot Deception Tactics. In: Al-Shaer E., Wei J., Hamlen K., Wang C. (eds) Autonomous Cyber Deception. Springer, Cham. https://doi.org/10.1007/978-3-030-02110-8_3`
+
+- refers to "planning and integrating deception into computer security defences" [scholar link](https://scholar.google.com/scholar?q=M.%20H.%20Almeshekah%20and%20E.%20H.%20Spafford.%20Planning%20and%20integrating%20deception%20into%20computer%20security%20defenses.%20In%20Proceedings%20of%20the%202014%20New%20Security%20Paradigms%20Workshop%2C%20pages%20127%E2%80%93138%2C%20New%20York%2C%20NY%2C%20USA%2C%202014.%20ACM.)
+- refers to "introduction to cyberdeception" [scholar link](https://scholar.google.com/scholar_lookup?title=Introduction%20to%20Cyberdeception&author=N%20C.%20Rowe&author=J.%20Rrushi&publication_year=2016)
+- cybersecurity adapts the idea from military to use fake files/assets to lure and deceive (counterintelligence)
+- all in all it summarizes what, in terms of a honeypot, can be simulated and utilized to deceive a potential attacker
+    - fake users, responses, applications/services ...
+
+- "Deception in recipient and location-at: An adversary’s activities can be routed to a 'sandbox' site where they can be better controlled"
+- deceiving an malicious actor by provoding what they want in pieces to discourage them - as way of securing the infra
+- "A sophisticated honeypot could use automated planning to better manipulate the user."
+- the author suggests that unexpected message like random errors may be difficult for them to handle - i suppose it refers to low interaction honeypots not implementing all functionality
+- moreover they suggest:
+    - randomization of characters/files tend to look like encrypted files
+    - other low-interaction honeypot tactics to deceive the attack about the functionality
+
 
 ## design ideas
 
@@ -214,6 +244,10 @@ issue #8: existing solutions
 - my solution should be a deception technology based on k8s with additional full freedom for the visitor, unlike a honeypot which aims to stop the attacker as soon as possible and gather IOCs.
 - dynamically changing the attack surface? [darkreading blog](https://www.darkreading.com/vulnerabilities---threats/advanced-deception-how-it-works-and-why-attackers-hate-it/a/d-id/1330600)
     - acts as a deterrent and only could be experimented with to see the effect
+
 - have low interaction honeypots in the perimeter to lure the attackers in a hole/network full of high-interaction deception services
     - technologically the low-interaction honeypots will appear as points of access (e.g. SSH server).. a connection to it would be routed to a full-interaction server in the network (k8s cluster)
+
 - k8s cluster of remote servers all over the internet?
+- create a paralell environment to lure the attackers in (somewhere in the perimeter) an isolated network with "live" traffic and users to be as attractive as possible
+    - problem could be the possibility of the attacker evading the real organization's production systems
