@@ -153,15 +153,18 @@ issue #8: existing solutions
 **architecture**
 - physical IOT devices as th devices under attack
 - wormholes - live device on the Internet with exposed ports forwarding the traffic to the IOT devices
+    - similarly to the study other [study](ihttps://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results), the devices are spoofed all over the world
+
 - the traffic is forwarded through a proxy _Forwarder_, which can act as a gateway to all devices on one network or even as a TLS MITM
+    - the devices are technically separated  using VLANs 802.1Q
+    - connection between the wormholes and the forwarder is via reverse ssh tunnel, which redircts a given port traffic. in addition the forwarder utilizes socat to redirect the connection to a specific device.
+
 - finally it consists of a storage and analysis unit
 
 **compromise countermeasures**
 - periodic resets
 - ips e.g. suricata
 - iot specific low-level instrumentation connections (e.g. JTAG)
-
-TODO: continue on chapter 4
 
 
 # NOTES
