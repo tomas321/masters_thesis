@@ -9,14 +9,7 @@ issue #8: existing solutions
 - cuckoo is different in a way of knowing the malware (pid, filename, etc.)
     - it knows where to start and what traces to follow..
 
-### [sandboxing](https://cuckoo.sh/docs/introduction/sandboxing.html)
-
-- suggests to leave traces of normal in the environment if the malware is interested in such
-    - cookies
-    - browsing history
-    - documents
-    - ...
-- suggests to hide as many virtualization traces (if necessary) as possible
+- cuckoo is application sandboxing, which is not my case (sandboxed honeynet), but it is using similar techniques to analysis/monitor/explore any activity
 
 ### [concept](https://cuckoo.sh/docs/introduction/what.html)
 
@@ -27,6 +20,7 @@ issue #8: existing solutions
     - Network traffic trace in PCAP format.
     - Screenshots taken during the execution of the malware.
     - Full memory dumps of the machines.
+
 - consists of the management software (host machine) and a number of virtual/physcal machines for analysis
 
 
@@ -52,15 +46,12 @@ issue #8: existing solutions
 
 ## falcon sandbox
 [hybrid-analysis.com](hybrid-analysis.com)
-- similar to cuckoo, but claims to bemore effective and precise
+- similar to cuckoo
+- according to a [blog](https://inquest.net/blog/2018/03/12/defense-in-depth-detonation-technologies) the falcon sandbox does offer an anti-evasion feature
 
 ## [and more](https://www.g2.com/categories/malware-analysis-tools?utf8=%E2%9C%93&order=top_shelf)
 
 # active analysis (honeypots/honeynet), deception technologies
-
-## [Honeynet based distributed adaptive network forensics and active real time investigation](https://www.researchgate.net/publication/221001129_Honeynet_based_distributed_adaptive_network_forensics_and_active_real_time_investigation)
-
-- requested a full text document from the author via th platform.. no luck yet
 
 ## guardicore - not a vendor, just a blog
 
@@ -72,10 +63,12 @@ issue #8: existing solutions
     - memory event - logs and alerts from third-party software
     - network event - e.g. outgoing traffic SYN packet
     - disk event - file modifications
+
 - concentrates on worm infections
 - include a PoC with Blaster worm attack (divided to these events)
     - time-based graph to map the changes
-- includes a analysis Node (out of scope)
+
+- includes an analysis Node (out of scope)
 - honeypot evasion
 
 ## [honeypoint](https://www.microsolved.com/honeypoint) by microsolved inc.
@@ -84,7 +77,7 @@ issue #8: existing solutions
 - consists of various compenents that could be replicated into the k8s architecture. [what is honeypoint](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/)
     - it's a robust architecture to mimic a complex network environment for deceiving an attacker
 - good podcast about deception technologies and honeypots
-    - Microsolved inc. CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be consider suspicious, if the honeypot targets malicious actors scanning the internet regardless of possible domain. NOTE: no one randomely tries IP addresses and look for a service.
+    - Microsolved inc. CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the internet regardless of possible domain. NOTE: no one randomely tries IP addresses and look for a service.
 - deployment of honeypoint in 2 hours with couple of emulated services, decoy sensors and consoles for interaction
 - honeypoint personal edition turns attacker targets into security sensors (emulates services)
 
@@ -92,9 +85,24 @@ issue #8: existing solutions
 
 - deploys lures/baits to endpoints ussually used by attackers
 - the baits cannot be distiguished by an attacker
-- no damge is done to the production env
+- no damage is done to the production env
 - IMHO sits paralell to the prod env
 - not much docs provided (commercial)
+
+### email request for more info
+subject:
+`More documentation/information about your product`
+
+body:
+```
+Hello,
+
+I'm an Information Security  student, studying at FIIT STU in Bratislava Slovakia. In my final thesis I'm looking for deception technology or honeypot/honeynet-like tools and mechanisms. Coming across your solution stoke me, that it's very similar to my scope of study. Do you have some other blogs or technical documentation that would explain your solution? I'm only asking for (without any engagement) additional information besides your official website (cybertrap.com).
+
+Sincerely,
+
+Tomas Bellus
+```
 
 ## [study](https://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results): A distributed platform of high interaction honeypotsand experimental results
 
@@ -107,7 +115,7 @@ issue #8: existing solutions
 - logged data is periodically copied from the VM disk to the host disk at given time of the day
     - the authors suggest it's a hard to identify by the attacker
 
-- after that the data is store in a database with a given structure
+- after that the data is stored in a database with a given structure
     - data from each ssh login attempt
     - data from each successful ssh connection - tty buffer content and tty name
     - data of programs executed  with parameters and the terminal in which it ran
@@ -137,7 +145,7 @@ issue #8: existing solutions
     - changes the password of current user
     - install an IP scan program and scans the IP range to recon for potential lateral movement
     - IRC client setup for receiving instructions
-    - privilege escalation attemp
+    - privilege escalation attempt
 
 - general trends of attacker behaviors (with root):
     - change the root password
