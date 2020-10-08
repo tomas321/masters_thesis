@@ -59,16 +59,34 @@ issue #8: existing solutions
 
 ## [honeystat](https://people.engr.tamu.edu/guofei/paper/honeystat.pdf)
 
-- event-based network of honeypots
+- Blaster worm behavior observation study to learn about detecting zero-day worms
+- they assume the monitored infection may be described in a systematic way, so by knowing the worm agenda and steps they model the expected monitoring
+- event-based network of honeypots:
     - memory event - logs and alerts from third-party software
-    - network event - e.g. outgoing traffic SYN packet
+        - in case of thr Blaster worm the RPC service buffer overflow exploit is caracterized as this event
+        - easier to monitor when no regular users are present (no false possitives)
+
+    - network event - e.g. outgoing traffic (e.g. TCP SYN) since there is no honeypot-triggered outgoing traffic
+        - they mention statistical models e.g. Kalman filtering network noise
+
     - disk event - file modifications
 
-- concentrates on worm infections
-- include a PoC with Blaster worm attack (divided to these events)
-    - time-based graph to map the changes
+- time based data is collected for use in a local IDS
+- honeystat is deployed in a multihomed VMWare environment of virtual minimal honeypots
+    - it's because a worm requires a multiple hosts, which in VMWare case is 64 VMs * 32 IP address = 2^11 IP address representing active hosts
 
+- all features and considerations for honeystat are for worm observation and for other infections more data should be extracted
 - includes an analysis Node (out of scope)
+- procedure
+    - honeypots are capturing memory and disk events
+    - if a network event occurs, the honeypot is reset to stop further spread of the worm to other machines/honeypot
+        - any previous memory/disk event is updated with additional information from the network event
+        - resets ought to be faster in virtual environment. Host VM is not reboot, only the virtual disk (VD) is kept in a suspended state before it's replaced with a fresh copy of the VD. they claim the reset always completes before a TCP timeout.
+
+    - other steps include the analysis node
+
+- hardware emulation mechanisms are exposing the virtualized environment via e.g. BIOS strings or MAC address
+- this solution does not introduce any isolation techniques beside utilizing virtualization
 - honeypot evasion
 
 ## [honeypoint](https://www.microsolved.com/honeypoint) by microsolved inc.
