@@ -1,111 +1,77 @@
 issue #8: existing solutions
 
-# malware analysis tools
+Honeypot, sandbox and deception technology make up the leading techniques in dynamic malware analysis. They differ in the scope of knowledge before the analysis at hand. Some know the filename, malware type, other artifacts and possible the expected outcome (in which case the tool observes the behavior). Other analyze the behavior of all activity - searching for anomalies and malicious behavior indicators. The following sections briefly introduce the malware analysis existing solutions and studies.
 
-## [cuckoo sandbox](https://cuckoo.sh/docs/)
+# Malware file analysis solutions
 
-- supports win, macos, linux and android
-- dynamic file analysis tool with reporting
-- cuckoo is different in a way of knowing the malware (pid, filename, etc.)
-    - it knows where to start and what traces to follow..
+Malware file analysis is a dynamic procedure when the filename and malware type is known. In comparison to the scope of this thesis, all use similar techniques of malicious activity observation/monitoring, but differ in use case scenarios.
 
-- cuckoo is application sandboxing, which is not my case (sandboxed honeynet), but it is using similar techniques to analysis/monitor/explore any activity
+## [Cuckoo sandbox](https://cuckoo.sh/docs/)
 
-### [concept](https://cuckoo.sh/docs/introduction/what.html)
+A most common sandbox environment for malware analysis by executing a given file in a sandboxed environment with reporting of the outcome. All files affecting mainstream operating systems i.e. Windows, macOS, Linux and Android are supported. In addition to known artifacts, cuckoo has  no interfering processes, so all traces must be followed and privide insight to the behavior. Based on the official cuckoo documentation, the system produces various results (the following artifacts are  copied from the documentation site):
 
-- retrieves the following types of results:
-    - Traces of calls performed by all processes spawned by the malware.
-    - Files being created, deleted and downloaded by the malware during its execution.
-    - Memory dumps of the malware processes.
-    - Network traffic trace in PCAP format.
-    - Screenshots taken during the execution of the malware.
-    - Full memory dumps of the machines.
+- Traces of calls performed by all processes spawned by the malware.
+- Files being created, deleted and downloaded by the malware during its execution.
+- Memory dumps of the malware processes.
+- Network traffic trace in PCAP format.
+- Screenshots taken during the execution of the malware.
+- Full memory dumps of the machines.
 
-- consists of the management software (host machine) and a number of virtual/physcal machines for analysis
-
+Despite all differences, cuckoo's architecture consists of the management software (host machine) and a number of virtual/physcal machines for analysis. It's a tool for different use case, so a comparison is insignificant.
 
 ## [Droidbox](https://github.com/pjlantz/droidbox)
 
-- dynamic file analysis tool
-- dedicated to android application
-- analysis the application and reports:
-    - Hashes for the analyzed package
-    - Incoming/outgoing network data
-    - File read and write operations
-    - Started services and loaded classes through DexClassLoader
-    - Information leaks via the network, file and SMS
-    - Circumvented permissions
-    - Cryptographic operations performed using Android API
-    - Listing broadcast receivers
-    - Sent SMS and phone calls
+Another open source tool, sadly discontinued several years ago, droidbox utilizes analyzes android applications using Android Virtual Devices (AVD) and the android emulator 4.1.1_rc6, which enables the android activity monitoring. Analyzed applications are sandboxed in the AVDs and afterwards reports the following results (the following artifacts are  copied from the documentation site):
 
-## virustotal
+- Hashes for the analyzed package
 
-- dynamic/static file analysis
-- uses antivirus engines, website scanners and blacklists
+- Incoming/outgoing network data
+- File read and write operations
+- Started services and loaded classes through DexClassLoader
+- Information leaks via the network, file and SMS
+- Circumvented permissions
+- Cryptographic operations performed using Android API
+- Listing broadcast receivers
+- Sent SMS and phone calls
 
-## falcon sandbox
-[hybrid-analysis.com](hybrid-analysis.com)
-- similar to cuckoo
-- according to a [blog](https://inquest.net/blog/2018/03/12/defense-in-depth-detonation-technologies) the falcon sandbox does offer an anti-evasion feature
+Droidbox introduces a simple way of analyzing android applications via an existing API of the emulator.
 
-## [and more](https://www.g2.com/categories/malware-analysis-tools?utf8=%E2%9C%93&order=top_shelf)
+## Virustotal
 
-# active analysis (honeypots/honeynet), deception technologies
+Similarly to cuckoo, virustotal utilizes both static and dynamic malware analysis. "VirusTotal's aggregated data is the output of many different antivirus  engines, website scanners, file and URL analysis tools, and user  contributions" [[link](https://support.virustotal.com/hc/en-us/articles/115002126889-How-it-works)].
 
-## guardicore - not a vendor, just a blog
+## Falcon sandbox
+A direct concurrency to virustoal is the [Hybrid Analysis](hybrid-analysis.com) tool powered by the Falcon sandbox. Again, it's similar to cuckoo, except the anti-evasion feature [[blog](https://inquest.net/blog/2018/03/12/defense-in-depth-detonation-technologies)], which allows, even sandbox-aware malware, to be analyzed despite their evasion techniques.
 
-- first [mention](https://www.guardicore.com/2018/10/dynamic-honeypot-cyber-security/) of a dynamic honeypot, which generates live environments that adapt to the attackers
+## [more sandbox realted malware analysis tools](https://www.g2.com/categories/malware-analysis-tools?utf8=%E2%9C%93&order=top_shelf)
 
-## [honeystat](https://people.engr.tamu.edu/guofei/paper/honeystat.pdf)
+Most certainly, there are numerous other sandbox based tools, but there are minimal differences.
 
-- Blaster worm behavior observation study to learn about detecting zero-day worms
-- they assume the monitored infection may be described in a systematic way, so by knowing the worm agenda and steps they model the expected monitoring
-- event-based network of honeypots:
-    - memory event - logs and alerts from third-party software
-        - in case of thr Blaster worm the RPC service buffer overflow exploit is caracterized as this event
-        - easier to monitor when no regular users are present (no false possitives)
+# Active analysis
 
-    - network event - e.g. outgoing traffic (e.g. TCP SYN) since there is no honeypot-triggered outgoing traffic
-        - they mention statistical models e.g. Kalman filtering network noise
+This section explores existing honeypot/honeynet technologies and a recently emerged concept - deception technologies. These technologies may be divided into two categories - [dynamic](https://www.guardicore.com/2018/10/dynamic-honeypot-cyber-security/) and static, where the environment adapt to the scenarios or remains unchanged respectively.
 
-    - disk event - file modifications
+## [Honeystat](https://people.engr.tamu.edu/guofei/paper/honeystat.pdf)
 
-- time based data is collected for use in a local IDS
-- honeystat is deployed in a multihomed VMWare environment of virtual minimal honeypots
-    - it's because a worm requires a multiple hosts, which in VMWare case is 64 VMs * 32 IP address = 2^11 IP address representing active hosts
+Honeystat is a honeypot solution observing the behavior of the Blaster worm  and may be used to detect zero day worm threats. The authors assume the infection may be described in a systematic way, so by knowing the worm agenda and steps they model the monitoring procedure. The observation is event-based with memory, disk and network events. Since there are no regular users in the system, the memory events are e.g. interesting violations as buffer overflows and other. Disk events are file system modifications and network events should always be infection related outgoing traffic. Worms require a multi-host network to have spreading possibility, so honeystat is deployed in a multihomed VMWare environment (64 VMs * 32 IP addresses = 2^11 IP) with minimal honeypots.
 
-- all features and considerations for honeystat are for worm observation and for other infections more data should be extracted
-- includes an analysis Node (out of scope)
-- procedure
-    - honeypots are capturing memory and disk events
-    - if a network event occurs, the honeypot is reset to stop further spread of the worm to other machines/honeypot
-        - any previous memory/disk event is updated with additional information from the network event
-        - resets ought to be faster in virtual environment. Host VM is not reboot, only the virtual disk (VD) is kept in a suspended state before it's replaced with a fresh copy of the VD. they claim the reset always completes before a TCP timeout.
+The procedure when events are encountered is:
 
-    - other steps include the analysis node
+- The honeystat is capturing memory and disk events
+- If a network event occurs, the honeypot is reset to stop further spread of the worm to other machines/honeypots.
+  - Any previous memory/disk event is updated with additional information from the network event.
+  - Resets ought to be faster in virtual environment. Host VM is not rebooted, only the virtual disk (VD) is kept in a suspended state before it's replaced with a fresh copy of a VD. The reset always completes before a TCP timeout.
+- Other steps include an analysis node, which is out of scope of this thesis.
 
-- hardware emulation mechanisms are exposing the virtualized environment via e.g. BIOS strings or MAC address
-- this solution does not introduce any isolation techniques beside utilizing virtualization
-- honeypot evasion
+This solution does not introduce any isolation techniques beside utilizing virtualization and the emulation mechanisms are exposing the virtualized environment via e.g. BIOS strings or MAC address. All features and considerations for honeystat are purely for worm infection detection, other infection types could require more observables.
 
-## [honeypoint](https://www.microsolved.com/honeypoint) by microsolved inc.
+## [Honeypoint](https://www.microsolved.com/honeypoint) by microsolved inc.
 
-- services emulation
-- consists of various compenents that could be replicated into the k8s architecture. [what is honeypoint](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/)
-    - it's a robust architecture to mimic a complex network environment for deceiving an attacker
-- good podcast about deception technologies and honeypots
-    - Microsolved inc. CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the internet regardless of possible domain. NOTE: no one randomely tries IP addresses and look for a service.
-- deployment of honeypoint in 2 hours with couple of emulated services, decoy sensors and consoles for interaction
-- honeypoint personal edition turns attacker targets into security sensors (emulates services)
+Service emulation is what Honeypoint utilizes to lure malicious actors and detect their agenda. Production services lie in the same environment as the robust architecture of Honeypoint, which can mimic a complex network environment for deceiving an attacker. The Microsolved CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the Internet regardless of possible domain - randomly trying IP addresses and looking for a services ought to have malicious intent. Consists of various components that could be replicated in the Kubernetes architecture design [[what is honeypoint](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/)].
 
-## [cybertrap](https://cybertrap.com/solutions/#endpointdeception)
+## [Cybertrap](https://cybertrap.com/solutions/#endpointdeception)
 
-- deploys lures/baits to endpoints ussually used by attackers
-- the baits cannot be distiguished by an attacker
-- no damage is done to the production env
-- IMHO sits paralell to the prod env
-- not much docs provided (commercial)
+A purely documented (commercial) solution Cybertrap operates as a deception technology luring attackers away from production systems. Looking apart from that services in Honeystat are emulated, Cybertrap's deployed services cannot be distinguished by the attacker. Once the malicious actor gets inside such network, all his/her movements are tracked. In addition, the Cybertrap's network is inaccessible by regular users, so any activity within the simulated environment is consider malicious - minimal to none false positives. Cybertrap is close to the idea of the goal of this thesis - sandboxed honeynet.
 
 ### email request for more info
 subject:
@@ -122,30 +88,19 @@ Sincerely,
 Tomas Bellus
 ```
 
-## [study](https://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results): A distributed platform of high interaction honeypotsand experimental results
+## A distributed platform of high interaction honeypots and experimental results
 
-### concept
+A case [study](https://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results) serving as a proof of concept in live Internet traffic observing malicious actors' trends and agenda. As a monitoring technique they patched the kernel's `tty` and `exec` modules to intercept the keystrokes and system calls respectively. The architecture is 4 machines anywhere in the world working as relays to the authors' local setup of VM honeypots. The traffic incoming to the public interface of the relay is routed to a GRE tunnel connected to the local VM.
 
-- as a monitoring technique they patched the kernel's `tty` and `exec` module to intercept the keystrokes and system calls respectively
-- in a SSH scenario they created a new syscall and modified the ssh server to use it
-    - intercepting the login-password pair for the SSH server
+In a SSH scenario the created a new syscall and modified the SSH server to use it in order to intercept the login credentials. Logged data is periodically copied from the VM disk to the host disk (such extractions should be undetected by the malicious actors). All login data is stored to the database of this structure:
 
-- logged data is periodically copied from the VM disk to the host disk at given time of the day
-    - the authors suggest it's a hard to identify by the attacker
+- data from each ssh login attempt
+- data from each successful ssh connection - tty buffer content and tty name
+- data of programs executed  with parameters and the terminal in which it ran
+- session data grouping ssh connections
 
-- after that the data is stored in a database with a given structure
-    - data from each ssh login attempt
-    - data from each successful ssh connection - tty buffer content and tty name
-    - data of programs executed  with parameters and the terminal in which it ran
-    - session data grouping ssh connections
+### Experiment
 
-**architecture**
-- 4 machines anywhere in the world working as relays to the authors' local setup of VM honyepots
-    - the VMs ensure an isolated environment with one level of virualization
-
-- the traffic incomming to the public interface of the relay, is routed to a GRE tunnel to the local VM
-
-**experiment**
 - in the period of 30 days, they monitored what are the most common log-password pairs when no accounts are created
     - they found that for most attempts the login and password were the same
 
@@ -171,31 +126,17 @@ Tomas Bellus
     - checkout info about legitimate users of the computer via custom installed software
     - one attacker replaced the ssh client binary
 
-## [study](https://arxiv.org/pdf/1701.02446.pdf): SIPHON: Towards Scalable High-Interaction Physical Honeypots
+## SIPHON: Towards Scalable High-Interaction Physical Honeypots
 
-- IOT honeypots based on real devices
-- they assume attackers use Shodan to identify the vulnerable IOT devices
+A case [study](https://arxiv.org/pdf/1701.02446.pdf), similar to the study before, serving as a proof of concept in live Internet traffic observing the IOT related malicious intents. Leveraging Shodan to appear visible and legitimate in the eyes of malicious actors, the honeypots where based on real devices. The architecture is divided into physical IOT devices, wormholes exposed to the Internet forwarding to the IOT devices via the proxy forwarder. Technically are devices separated using VLANs 802.1Q and the wormhole to forwarder connection are via reverse ssh tunnels. As compromise countermeasures the suricata IPS and IDS features are enabled in the local netowork and periodic resets of IOT devices.
 
-**architecture**
-- physical IOT devices as th devices under attack
-- wormholes - live device on the Internet with exposed ports forwarding the traffic to the IOT devices
-    - similarly to the study other [study](ihttps://www.researchgate.net/publication/262277761_A_distributed_platform_of_high_interaction_honeypots_and_experimental_results), the devices are spoofed all over the world
-
-- the traffic is forwarded through a proxy _Forwarder_, which can act as a gateway to all devices on one network or even as a TLS MITM
-    - the devices are technically separated  using VLANs 802.1Q
-    - connection between the wormholes and the forwarder is via reverse ssh tunnel, which redircts a given port traffic. in addition the forwarder utilizes socat to redirect the connection to a specific device.
-
-- finally it consists of a storage and analysis unit
-
-**compromise countermeasures**
-- periodic resets
-- ips e.g. suricata
-- iot specific low-level instrumentation connections (e.g. JTAG)
+They observed the influence of device listing in Shodan. The number of scans/connection attempts on the device has tripled between 'one week before listing' and 'one week after listing'. It proves that being visible by Shodan increases the possibility of attack reconnaissance on device at hand. Although, after two week after listing in Shodan, the connection attempts has decreased, which good piece of knowledge before implementation.
 
 
 # NOTES
 
 [Automated Static Analysis vs. Dynamic Analysis - Better Together?](https://blog.reversinglabs.com/blog/automated-static-analyis-vs.dynamic-analysis)
+
 - must hide the fact that its a sandbox, otherwise the malware will not start
     - detection of lack of applications and files
     - delayed malware execution
@@ -253,27 +194,3 @@ it's a chapter, citation: `Rowe N.C. (2019) Honeypot Deception Tactics. In: Al-S
 - moreover they suggest:
     - randomization of characters/files tend to look like encrypted files
     - other low-interaction honeypot tactics to deceive the attack about the functionality
-
-
-## design ideas
-
-- must have a termination point at which is the honeynet terminated to stop spreading
-- look out for the [catch-22](https://en.wikipedia.org/wiki/Catch-22_(logic)) contradictory issue
-- use case: admin has found a backdoor in the organization's network
-    - setups the same backdoor in a isolated environment and direct the malicious actor to that islocation env for further monitoring and analysis
-
-- module like architecture to differentiate the target malwares being detected
-    - the modules would differ in deployment, services, configation, dependency installations and monitoring toolset
-
-- work towards easy scalability and variablity (k8s)
-- include automated bot users to play as real users as [honeybees](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/) in honeypoint solution.
-- my solution should be a deception technology based on k8s with additional full freedom for the visitor, unlike a honeypot which aims to stop the attacker as soon as possible and gather IOCs.
-- dynamically changing the attack surface? [darkreading blog](https://www.darkreading.com/vulnerabilities---threats/advanced-deception-how-it-works-and-why-attackers-hate-it/a/d-id/1330600)
-    - acts as a deterrent and only could be experimented with to see the effect
-
-- have low interaction honeypots in the perimeter to lure the attackers in a hole/network full of high-interaction deception services
-    - technologically the low-interaction honeypots will appear as points of access (e.g. SSH server).. a connection to it would be routed to a full-interaction server in the network (k8s cluster)
-
-- k8s cluster of remote servers all over the internet?
-- create a paralell environment to lure the attackers in (somewhere in the perimeter) an isolated network with "live" traffic and users to be as attractive as possible
-    - problem could be the possibility of the attacker evading the real organization's production systems
