@@ -7,8 +7,14 @@
       auto lo
       iface lo inet loopback
   tasks:
+    - name: check {{ bridge }} exists
+      failed_when: false
+      command: "ip link show {{ bridge }}"
+      register: bridge_presence
+
     - name: remove bridge
       become: true
+      when: bridge_presence.rc == 0
       command: "ip link del {{ bridge }}"
 
     - name: reset the etc_network_interfaces
