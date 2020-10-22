@@ -13,8 +13,11 @@ At first, propose multiple static scenarios and environments with coresponding o
 
 ## scenarios
 
+refer to the sceranio-dedicated [repository](https://github.com/tomas321/k8s-environment-scenarios)
+
 - web + db + mail (?) + ...
 - IOT scenario
+- and other
 
 
 # honeynet concealment strategies
