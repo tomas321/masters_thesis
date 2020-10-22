@@ -1,0 +1,7 @@
+---
+
+- name: nfs | restart server
+  become: true
+  service:
+    name: "{{ nfs_service }}"
+    state: restarted

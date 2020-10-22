@@ -1,0 +1,28 @@
+# NFS
+
+simple NFS server setup exporting single direcotry with given permissions
+
+## Requirements
+
+None
+
+## Dependencies
+
+None
+
+## Role variables
+
+refer to defaults:
+    - [Debian](./defaults/Debian.yml)
+
+## Example playbook
+
+- hosts: localhost
+  roles:
+    - role: nfs
+      vars:
+        nfs_export_subnet: '192.168.0.0/28'
+
+## Author information
+
+Tomas Bellus

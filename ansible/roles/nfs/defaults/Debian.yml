@@ -1,0 +1,19 @@
+---
+
+nfs_dependencies: []
+nfs_package: nfs-kernel-server
+nfs_service: nfs-kernel-server
+
+# share directory holding data
+nfs_export_directory: '/mnt/nfs_share'
+
+#
+nfs_export_config_file: '/etc/exports'
+
+# let everyone access the storage
+nfs_export_directory_owner: nobody
+nfs_export_directory_group: nogroup
+
+nfs_export_subnet: '10.0.0.0/24'
+nfs_export_permissions: |
+  {{ nfs_export_directory }}  {{ nfs_export_subnet }}(rw,sync,no_subtree_check)
