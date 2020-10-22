@@ -1,0 +1,31 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+    m1.k8s.dev.local:
+    n1.k8s.dev.local:
+    n2.k8s.dev.local:
+    data1.k8s.dev.local:
+  vars:
+    ansible_connection: ssh
+    python_interpreter: /usr/bin/python3
+  children:
+    k8s:
+      children:
+        k8s-cluster:
+          hosts:
+            m1.k8s.dev.local:
+            n1.k8s.dev.local:
+            n2.k8s.dev.local:
+        k8s-master:
+          hosts:
+            m1.k8s.dev.local:
+        k8s-workers:
+          hosts:
+            n1.k8s.dev.local:
+            n2.k8s.dev.local:
+        data-storage:
+          hosts:
+            data1.k8s.dev.local:
+      vars:
+        ansible_user: vagrant
