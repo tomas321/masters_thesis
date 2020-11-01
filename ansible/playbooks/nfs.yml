@@ -1,5 +1,20 @@
 ---
 
+- hosts: k8s
+  tasks:
+    - name: install nfs kernel server
+      become: true
+      apt:
+        name: nfs-kernel-server
+
 - hosts: data-storage
+  pre_tasks:
+    # set_fact overrides vars included by include_vars
+    - set_fact:
+        nfs_export_options:
+          - rw
+          - sync
+          - no_subtree_check
+          - no_root_squash
   roles:
     - nfs

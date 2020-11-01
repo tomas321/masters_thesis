@@ -15,5 +15,9 @@ nfs_export_directory_owner: nobody
 nfs_export_directory_group: nogroup
 
 nfs_export_subnet: '10.0.0.0/24'
+nfs_export_options:
+  - rw
+  - sync
+  - no_subtree_check
 nfs_export_permissions: |
-  {{ nfs_export_directory }}  {{ nfs_export_subnet }}(rw,sync,no_subtree_check)
+  {{ nfs_export_directory }}  {{ nfs_export_subnet }}({{ nfs_export_options | join(',') }})
