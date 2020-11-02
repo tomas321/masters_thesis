@@ -1,0 +1,22 @@
+---
+
+- become: true
+  become_user: "{{ kubectl_user }}"
+  block:
+    - name: nfs provisioner | substitude template vars
+      template:
+        src: "{{ item }}"
+        dest: "/tmp/{{ item.split('.j2')[0] }}"
+      loop:
+        - rbac.yaml.j2
+        - storageclass.yaml.j2
+        - deployment.yaml.j2
+
+    - name: nfs provisioner | apply resource objects to cluster
+      shell: >
+        kubectl get -f "/tmp/{{ item }}" ||
+        kubectl create --validate=false -f "/tmp/{{ item }}"
+      loop:
+        - rbac.yaml
+        - storageclass.yaml
+        - deployment.yaml

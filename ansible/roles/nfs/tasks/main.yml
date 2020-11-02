@@ -10,68 +10,10 @@
       paths:
         - 'defaults'
 
-- name: nfs | install dependencies
-  become: true
-  apt:
-    name: "{{ item }}"
-    state: present
-  loop: "{{ nfs_dependencies }}"
-  tags:
-    - install
+- name: install and setup NFS share
+  when: nfs_role_mode == 'export'
+  include_tasks: nfs_export.yml
 
-- name: nfs | install nfs kernel server
-  become: true
-  apt:
-    name: "{{ nfs_package }}"
-    state: present
-    update_cache: true
-  tags:
-    - install
-
-- name: nfs | ensure nfs kernel server's running
-  become: true
-  service:
-    name: "{{ nfs_service }}"
-    state: started
-  tags:
-    - install
-    - configure
-
-- name: nfs | ensure export directory exists
-  become: true
-  file:
-    state: directory
-    recurse: true
-    path: "{{ nfs_export_directory }}"
-    owner: "{{ nfs_export_directory_owner }}"
-    group: "{{ nfs_export_directory_group }}"
-    mode: "0777"
-  tags:
-    - install
-    - configure
-
-- name: nfs | ensure exports file exists
-  become: true
-  file:
-    state: file
-    path: "{{ nfs_export_config_file }}"
-    owner: root
-    group: root
-    mode: '0644'
-  tags:
-    - configure
-
-- name: nfs | configure nfs export permissions
-  become: true
-  blockinfile:
-    block: "{{ nfs_export_permissions }}"
-    path: "{{ nfs_export_config_file }}"
-  notify: nfs | restart server
-  tags:
-    - configure
-
-- name: nfs | export share directory
-  become: true
-  command: "exportfs -a"
-  tags:
-    - configure
+- name: setup nfs-provisioner in k8s
+  when: nfs_role_mode == 'provisioner'
+  include_tasks: nfs_provisioner.yml
