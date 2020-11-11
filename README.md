@@ -26,6 +26,16 @@ This repository inlcludes Vagrant files various deployments of multiple libvirt-
 
 This documents the test deployment for k8s and the applied networking.
 
+#### [Kubernetes fundamentals](./docs/kubernetes.md)
+
+k8s fundamentals gathered so far from the official documentation
+
+#### [Existing solutions](./docs/existing_solutions.md)
+
+Research of related work and existing solution on the market.
+
+Additionally includes collected knowledge and design ideas.
+
 ### Prerequisites
 **ansible** - `sudo pip3 install ansible`
 ### Setup and installation
