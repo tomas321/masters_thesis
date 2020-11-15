@@ -1,0 +1,9 @@
+---
+
+- hosts: m1.k8s.dev.local
+  roles:
+    - role: nfs
+      vars:
+        nfs_provisioner_server_ip: "{{ lookup('community.general.dig', groups['data-storage'][0])}}"
+        nfs_role_mode: k8s-provisioner
+        nfs_provisioner_objects_action: delete
