@@ -31,7 +31,7 @@ refer to defaults:
       roles:
         - role: nfs
           vars:
-            nfs_role_mode: provisioner
+            nfs_role_mode: k8s-provisioner
             nfs_provisioner_server_ip: '192.168.0.3'
 
 ## Author information

@@ -2,7 +2,7 @@
 
 # must be one of [export, provisioner]
 #   export - run setup and isntallation tasks
-#   provisioner - deploy provisioner resources
+#   k8s-provisioner - deploy provisioner resources
 nfs_role_mode: export
 
 # share directory holding data

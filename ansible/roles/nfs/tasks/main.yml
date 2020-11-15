@@ -15,5 +15,5 @@
   include_tasks: nfs_export.yml
 
 - name: setup nfs-provisioner in k8s
-  when: nfs_role_mode == 'provisioner'
+  when: nfs_role_mode == 'k8s-provisioner'
   include_tasks: nfs_provisioner.yml

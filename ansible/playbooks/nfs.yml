@@ -23,4 +23,4 @@
     - role: nfs
       vars:
         nfs_provisioner_server_ip: "{{ lookup('community.general.dig', groups['data-storage'][0])}}"
-        nfs_role_mode: provisioner
+        nfs_role_mode: k8s-provisioner
