@@ -22,6 +22,33 @@ Outline possiblities of how to setup the system, what to expect, what to do in o
     - in case the malware uses anti-honeypot techniques to stop malware analysts to execute it multiple times - such as number of connections to C2 server, run-once tactics
 
 - honeystat found that `kqueue` was efficient for virtual disk monitoring
+    - although only enumerated files and directories are monitored
+
+## docker-wise monitoring
+
+inspect the container and using that info spy on FS changes and network (?)
+- `docker inspect` provides enough info e.g. volumes, path to container fs, network settings
+
+### fs cahnges: overlayfs
+
+**MergedDir** - contains the merged data of all lower layers.. starting state of container FS
+**UpperDir** - is in the same layer, but contains all the diff (new files e.g. `root/.bash_history`) of the container FS!
+
+
+## opensource tools
+
+## [monks](https://github.com/alexandernst/monks)
+
+- kernel module hijacking syscalls
+- acts as a middle-man between user and kernel
+- "Monks is like strace, but tracing all and every single process from any user, at any level"
+
+## [execmon](https://github.com/kfiros/execmon)
+
+- consists of kernel module and user utility
+- intersepcts the `execve` syscalls in the kernel land and notifies the user
+- 5 years old
+- tested on ubuntu 14.04 (kernel 3.13)
 
 # storage mechanisms
 
