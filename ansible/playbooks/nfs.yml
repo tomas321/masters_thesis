@@ -1,0 +1,26 @@
+---
+
+- hosts: k8s
+  tasks:
+    - name: install nfs kernel server
+      become: true
+      apt:
+        name: nfs-kernel-server
+
+- hosts: data-storage
+  roles:
+    - role: nfs
+      vars:
+        nfs_role_mode: export
+        nfs_export_options:
+          - rw
+          - sync
+          - no_subtree_check
+          - no_root_squash
+
+- hosts: m1.k8s.dev.local
+  roles:
+    - role: nfs
+      vars:
+        nfs_provisioner_server_ip: "{{ lookup('community.general.dig', groups['data-storage'][0])}}"
+        nfs_role_mode: k8s-provisioner

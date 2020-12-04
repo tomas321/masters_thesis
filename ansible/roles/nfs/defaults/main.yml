@@ -1,0 +1,37 @@
+---
+
+# must be one of [export, provisioner]
+#   export - run setup and isntallation tasks
+#   k8s-provisioner - deploy provisioner resources
+nfs_role_mode: export
+
+# share directory holding data
+nfs_export_directory: '/mnt/nfs_share'
+
+# export configuration file
+nfs_export_config_file: '/etc/exports'
+
+# let everyone access the storage
+nfs_export_directory_owner: nobody
+nfs_export_directory_group: nogroup
+
+nfs_export_subnet: '10.0.0.0/24'
+nfs_export_options:
+  - rw
+  - sync
+  - no_subtree_check
+nfs_export_permissions: |
+  {{ nfs_export_directory }}  {{ nfs_export_subnet }}({{ nfs_export_options | join(',') }})
+
+nfs_provisioner_storageclass_parameters:
+  onDelete: retain
+  pathPattern: "${.PVC.namespace}/${.PVC.annotations.nfs.io/storage-path}"
+
+# NFS share server IP visible from k8s cluster
+# means that the nfs share is on the ansible role target node
+nfs_provisioner_server_ip: 127.0.0.1
+
+# must be one of [cerate, delete]
+#   create - craetes all nfs provisioner related objects
+#   delete - deletes them
+nfs_provisioner_objects_action: create

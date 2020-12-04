@@ -1,0 +1,61 @@
+---
+
+- name: nfs | install dependencies
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ nfs_dependencies }}"
+  tags:
+    - install
+
+- name: nfs | install nfs kernel server
+  become: true
+  apt:
+    name: "{{ nfs_package }}"
+    state: present
+    update_cache: true
+  tags:
+    - install
+
+- name: nfs | ensure nfs kernel server's running
+  become: true
+  service:
+    name: "{{ nfs_service }}"
+    state: started
+  tags:
+    - install
+    - configure
+
+- name: nfs | ensure export directory exists
+  become: true
+  file:
+    state: directory
+    recurse: true
+    path: "{{ nfs_export_directory }}"
+    owner: "{{ nfs_export_directory_owner }}"
+    group: "{{ nfs_export_directory_group }}"
+    mode: "0777"
+  tags:
+    - install
+    - configure
+
+- name: nfs | configure nfs export permissions
+  become: true
+  blockinfile:
+    create: true
+    group: root
+    owner: root
+    mode: 0644
+    path: "{{ nfs_export_config_file }}"
+    block: "{{ nfs_export_permissions }}"
+  notify: nfs | restart server
+  tags:
+    - configure
+
+- name: nfs | export share directory
+  become: true
+  changed_when: false
+  command: "exportfs -a"
+  tags:
+    - configure

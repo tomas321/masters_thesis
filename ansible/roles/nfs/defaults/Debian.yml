@@ -1,0 +1,5 @@
+---
+
+nfs_dependencies: []
+nfs_package: nfs-kernel-server
+nfs_service: nfs-kernel-server

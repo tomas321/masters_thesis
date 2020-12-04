@@ -1,0 +1,19 @@
+---
+
+- name: nfs | include platform dependent vars
+  include_vars: "{{ lookup('first_found', var_files) }}"
+  vars:
+    var_files:
+      files:
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+      paths:
+        - 'defaults'
+
+- name: install and setup NFS share
+  when: nfs_role_mode == 'export'
+  include_tasks: nfs_export.yml
+
+- name: setup nfs-provisioner in k8s
+  when: nfs_role_mode == 'k8s-provisioner'
+  include_tasks: nfs_provisioner.yml
