@@ -1,0 +1,103 @@
+---
+
+- hosts: localhost
+  vars:
+    distro: ubuntu/bionic/amd64
+    container_name: fswatch-test
+  tasks:
+    - name: Create a started container
+      lxd_container:
+        name: "{{ container_name }}"
+        state: started
+        source:
+          type: image
+          mode: pull
+          server: https://images.linuxcontainers.org
+          protocol: simplestreams
+          alias: "{{ distro }}"
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+        timeout: 600
+      register: lxd_info
+
+    - add_host:
+        name: "{{ container_name }}"
+        ansible_connection: lxd
+        ansible_python_interpreter: /usr/bin/python3
+        groups:
+          - container
+      changed_when: false
+
+
+- hosts: container
+  become: true
+  vars:
+    fswatch_dependencies:
+      - git
+      - python3-pip
+    fswatch_pip_dependencies:
+      - cmake
+    fswatch_repo_url: "https://github.com/tomas321/fswatch"
+    fswatch_repo_branch: "feature/millisecond_precision"
+    fswatch_repo_dest: "/opt/fswatch"
+    fswatch_cmake_build_dir: "{{ fswatch_repo_dest }}/build"
+    fswatch_cmake_target: "fswatch"
+    fswatch_monitor_dir: "/home/ubuntu"
+    fswatch_cmd_args: '-l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T" {{ fswatch_monitor_dir }}'
+  tasks:
+    - name: install fswatch dependencies
+      apt:
+        name: "{{ item }}"
+      loop: "{{ fswatch_dependencies }}"
+
+    - name: install fswatch pip dependencies
+      pip:
+        name: "{{ item }}"
+      loop: "{{ fswatch_pip_dependencies }}"
+
+    - name: clone fswatch repository
+      git:
+        repo: "{{ fswatch_repo_url }}"
+        version: "{{ fswatch_repo_branch }}"
+        dest: "{{ fswatch_repo_dest }}"
+      register: git_repo
+
+    - name: create build dir
+      file:
+        path: "{{ fswatch_cmake_build_dir }}"
+        state: directory
+
+    - name: cmake fswatch
+      command: >
+        cmake --target {{ fswatch_cmake_target }} {{ fswatch_repo_dest }}
+      args:
+        chdir: "{{ fswatch_cmake_build_dir }}"
+
+    - name: make fswatch
+      make:
+        chdir: "{{ fswatch_cmake_build_dir }}"
+        target: "{{ fswatch_cmake_target }}"
+
+    - name: configure systemd unit file
+      template:
+        src: fswatch.service.j2
+        dest: /etc/systemd/system/fswatch.service
+      register: unit_file
+
+    - name: enable the service
+      when: unit_file.changed
+      systemd:
+        daemon_reload: true
+        enabled: true
+        name: fswatch
+
+    - name: restart sys
+      when: "unit_file.changed or git_repo.changed"
+      systemd:
+        name: fswatch
+        state: restarted
+
+    - name: ensre the fswatch service is started
+      systemd:
+        name: fswatch
+        state: started

@@ -1,0 +1,9 @@
+[Unit]
+Description="watch changes in FS"
+
+[Service]
+Restart=always
+ExecStart={{ fswatch_cmake_build_dir }}/fswatch/fswatch {{ fswatch_cmd_args }}
+
+[Install]
+WantedBy=multi-user.target
