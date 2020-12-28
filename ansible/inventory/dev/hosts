@@ -8,7 +8,7 @@ all:
     data1.k8s.dev.local:
   vars:
     ansible_connection: ssh
-    python_interpreter: /usr/bin/python3
+    ansible_python_interpreter: /usr/bin/python3
   children:
     k8s:
       children:
