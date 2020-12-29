@@ -9,11 +9,11 @@
     fswatch_pip_dependencies:
       - cmake
     fswatch_repo_url: "https://github.com/tomas321/fswatch"
-    fswatch_repo_branch: "feature/millisecond_precision"
+    fswatch_repo_branch: "develop"
     fswatch_repo_dest: "/opt/fswatch"
     fswatch_cmake_build_dir: "{{ fswatch_repo_dest }}/build"
     fswatch_cmake_target: "fswatch"
-    fswatch_cmd_args: '-l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T" %I'
+    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T" %I'
     fswatch_services: []
     sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
     sneakpeek_repo_branch: "develop"
@@ -82,6 +82,10 @@
     - name: wirte systemd services to variable
       set_fact:
         fswatch_services: "{{ fswatch_services + systemd_services.stdout_lines }}"
+
+    - name: ran the following services
+      debug:
+        msg: "{{ fswatch_services }}"
 
     - name: configure systemd target file
       template:
