@@ -31,8 +31,19 @@ inspect the container and using that info spy on FS changes and network (?)
 
 ### fs cahnges: overlayfs
 
-**MergedDir** - contains the merged data of all lower layers.. starting state of container FS
-**UpperDir** - is in the same layer, but contains all the diff (new files e.g. `root/.bash_history`) of the container FS!
+Docker container root FS is located on the host machine and ca be accessed as any other directory:
+- **MergedDir**
+    - contains the merged data of all lower layers.. starting state of container FS
+
+- **UpperDir**
+    - is in the same layer, but contains all the diff (new files e.g. `root/.bash_history`) of the container FS!
+    - it does not contain any modified/renamed files
+
+- **Mounts**
+    - lists all shared/mounted volumes and binds
+    - includes information about type, source and destination paths, read-write flag, etc.
+
+Any docker container may be monitored when these volumes are well intepreted and filtered to vital file systems or directories.
 
 
 ## opensource tools
@@ -49,6 +60,12 @@ inspect the container and using that info spy on FS changes and network (?)
 - intersepcts the `execve` syscalls in the kernel land and notifies the user
 - 5 years old
 - tested on ubuntu 14.04 (kernel 3.13)
+
+## [fswatch](https://github.com/emcrisostomo/fswatch)
+
+- CLI and C++/C API to the libfswatch, which is ultimately the API to inotify
+- realtime monitoring tool of limited FS changes with 1 second accuracy
+- returns events of renamed, removed, modified, created and more
 
 # storage mechanisms
 
