@@ -1,3 +1,169 @@
-\chapter{Related Work}
+\chapter{Related Work \label{related}}
+Honeypot, sandbox and deception technology make up the leading techniques in dynamic malware analysis. They differ in the scope of knowledge before the analysis at hand. Some know the filename, malware type, other artifacts and possible the expected outcome (in which case the tool observes the behavior). Other analyze the behavior of all activity - searching for anomalies and malicious behavior indicators. The following sections briefly introduce the malware analysis, deception technology, honeypot and other existing solutions and studies related to the thesis topic.
 
-- Norman Sandbox - similating real environment by providing fake internet. all malware sample APIs and functionality is provided to give it the impression of real env.
+\section{Malware file analysis solutions \label{related:malware-anal}}
+Malware file analysis is a dynamic procedure when the filename and malware type is known. In comparison to the scope of this thesis, all use similar techniques of malicious activity observation/monitoring, but differ in use case scenarios.
+
+\subsection{Cuckoo sandbox \label{related:malware-anal:cuckoo}}
+A most common sandbox environment for malware analysis by executing a given file in a sandboxed environment with reporting of the outcome. All files affecting mainstream operating systems i.e.~Windows, MacOS, Linux and Android are supported. In addition to known artifacts, cuckoo has no interfering processes, so all traces must be followed and provide insight to the behavior. Based on the official cuckoo documentation, the system produces various results (the following artifacts are copied from the documentation site):
+
+\begin{itemize}[noitemsep]
+	\item
+	Traces of calls performed by all processes spawned by the malware.
+	\item
+	Files being created, deleted and downloaded by the malware during its execution.
+	\item
+	Memory dumps of the malware processes.
+	\item
+	Network traffic trace in PCAP format.
+	\item
+	Screenshots taken during the execution of the malware.
+	\item
+	Full memory dumps of the machines.
+\end{itemize}
+
+Despite all differences, cuckoo's architecture consists of the management software (host machine) and a number of virtual/physical machines for analysis. It's a tool for different use case, so a comparison is insignificant.
+
+\subsection{Droidbox \label{related:malware-anal:droidbox}}
+Another open source tool, sadly discontinued several years ago, droidbox utilizes analyzes android applications using Android Virtual Devices (AVD) and the android emulator 4.1.1\_rc6, which enables the android activity monitoring. Analyzed applications are sandboxed in the AVDs and afterwards reports the following results (the following artifacts are copied from the documentation site):
+
+\begin{itemize}[noitemsep]
+	\item
+	Hashes for the analyzed package
+	\item
+	Incoming/outgoing network data
+	\item
+	File read and write operations
+	\item
+	Started services and loaded classes through DexClassLoader
+	\item
+	Information leaks via the network, file and SMS
+	\item
+	Circumvented permissions
+	\item
+	Cryptographic operations performed using Android API
+	\item
+	Listing broadcast receivers
+	\item
+	Sent SMS and phone calls
+\end{itemize}
+
+Droidbox introduces a simple way of analyzing android applications via an existing API of the emulator.
+
+\subsection{Virustotal \label{related:malware-anal:virustotal}}
+Similarly to cuckoo, virustotal utilizes both static and dynamic malware analysis. "VirusTotal's aggregated data is the output of many different antivirus engines, website scanners, file and URL analysis tools, and user contributions" \cite{docs:virustotal}.
+
+\subsection{Falcon sandbox \label{related:malware-anal:falcon}}
+A direct concurrency to virustoal is the \texttt{Hybrid Analysis} \footnote{\url{hybrid-analysis.com}} tool powered by the Falcon sandbox. Again, it's similar to cuckoo, except the anti-evasion feature \cite{blog:detonation-techs}, which allows, even sandbox-aware malware, to be analyzed despite their evasion techniques.
+
+\section{Active analysis \label{related:active-anal}}
+This section explores existing honeypot/honeynet technologies and a recently emerged concept - deception technologies. These technologies may be divided into two categories - dynamic \cite{blog:dynamic-honeypot} and static, where the environment adapt to the scenarios or remains unchanged respectively.
+
+\subsection{Honeystat \label{related:active-anal:honeystat}}
+Honeystat \footnote{\url{https://people.engr.tamu.edu/guofei/paper/honeystat.pdf}} is a honeypot solution observing the behavior of the Blaster worm and may be used to detect zero day worm threats. The authors assume the infection may be described in a systematic way, so by knowing the worm agenda and steps they model the monitoring procedure. The observation is event-based with memory, disk and network events. Since there are no regular users in the system, the memory events are e.g.~interesting violations as buffer overflows and other. Disk events are file system modifications and network events should always be infection related outgoing traffic. Worms require a multi-host network to have spreading possibility, so honeystat is deployed in a multihomed VMWare environment (64 VMs * 32 IP addresses = $2^{11}$ IP) with minimal honeypots.
+
+The procedure when events are encountered is:
+
+\begin{itemize}[noitemsep]
+	\item
+	The honeystat is capturing memory and disk events
+	\item
+	If a network event occurs, the honeypot is reset to stop further spread of the worm to other machines/honeypots.
+	\item
+	Any previous memory/disk event is updated with additional information from the network event.
+	\item
+	Resets ought to be faster in virtual environment. Host VM is not rebooted, only the virtual disk (VD) is kept in a suspended state before it's replaced with a fresh copy of a VD. The reset always completes before a TCP timeout.
+	\item
+	Other steps include an analysis node, which is out of scope of this thesis.
+\end{itemize}
+
+This solution does not introduce any isolation techniques beside utilizing virtualization and the emulation mechanisms are exposing the virtualized environment via e.g.~BIOS strings or MAC address. All features and considerations for honeystat are purely for worm infection detection, other infection types could require more observables.
+
+\subsection{Honeypoint \label{related:active-anal:honeypoint}}
+Service emulation is what Honeypoint \footnote{\url{https://www.microsolved.com/honeypoint}} utilizes to lure malicious actors and detect their agenda. Production services lie in the same environment as the robust architecture of Honeypoint, which can mimic a complex network environment for deceiving an attacker. The Microsolved CEO Brent Huston claims \cite{podcast:honeypoint} that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user interacts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the Internet regardless of possible domain - randomly trying IP addresses and looking for a services ought to have malicious intent. Consists of various components \cite{docs:honeypoint} that could be replicated in the Kubernetes architecture design.
+
+\subsection{Cybertrap \label{related:active-anal:cybertrap}}
+A purely documented (commercial) solution Cybertrap \cite{site:cybertrap} operates as a deception technology luring attackers away from production systems. Looking apart from that services in Honeystat are emulated, Cybertrap's deployed services cannot be distinguished by the attacker. Once the malicious actor gets inside such network, all his/her movements are tracked. In addition, the Cybertrap's network is inaccessible by regular users, so any activity within the simulated environment is consider malicious - minimal to none false positives. Cybertrap is close to the idea of the goal of this thesis - sandboxed honeynet.
+
+\subsection{A distributed platform of high interaction honeypots and experimental results \label{related:active-anal:hih-study}}
+A case study \cite{study:hih} serving as a proof of concept in live Internet traffic observing malicious actors' trends and agenda. As a monitoring technique they patched the kernel's \texttt{tty} and \texttt{exec} modules to intercept the keystrokes and system calls respectively. The architecture is 4 machines anywhere in the world working as relays to the authors' local setup of VM honeypots. The traffic incoming to the public interface of
+the relay is routed to a GRE tunnel connected to the local VM.
+
+In a SSH scenario the created a new syscall and modified the SSH server to use it in order to intercept the login credentials. Logged data is periodically copied from the VM disk to the host disk (such extractions should be undetected by the malicious actors). All login data is stored to the database of this structure:
+
+\begin{itemize}[noitemsep]
+	\item
+	data from each ssh login attempt
+	\item
+	data from each successful ssh connection - tty buffer content and tty name
+	\item
+	data of programs executed with parameters and the terminal in which it ran
+	\item
+	session data grouping ssh connections
+\end{itemize}
+
+\subsubsection{Experiment \label{related:active-anal:hih-study:experiment}}
+
+\begin{itemize}[noitemsep]
+	\item
+	in the period of 30 days, they monitored what are the most common login-password pairs when no accounts are created
+	
+	\begin{itemize}
+		\item
+		they found that for most attempts the login and password were the same
+	\end{itemize}
+	\item
+	then for almost half a year they monitored the time it took the attacker to successfully login and to login with commands entered
+	
+	\begin{itemize}
+		\item
+		in some cases the attacker managed to get root via system vulnerable exploit
+	\end{itemize}
+	\item
+	they encountered attackers changing passwords of other accounts on the system
+	\item
+	they sorted their findings by country (mostly China, USA, Germany, UK, Russia, Romania, Japan, Brazil, France, South Korea and Netherlands)
+	\item
+	analyzed the intrusions and commands
+	
+	\begin{itemize}
+		\item
+		mostly they tried to download programs from the same country the source IP originated from
+	\end{itemize}
+	\item
+	general trends of attacker behaviors:
+	
+	\begin{itemize}
+		\item
+		check if i am alone on the system
+		\item
+		system recon - OS name and version, processor characteristics
+		\item
+		changes the password of current user
+		\item
+		install an IP scan program and scans the IP range to recon for
+		potential lateral movement
+		\item
+		IRC client setup for receiving instructions
+		\item
+		privilege escalation attempt
+	\end{itemize}
+	\item
+	general trends of attacker behaviors (with root):
+	
+	\begin{itemize}
+		\item
+		change the root password
+		\item
+		setup backdoor - open another port
+		\item
+		checkout info about legitimate users of the computer via custom installed software
+		\item
+		one attacker replaced the ssh client binary
+	\end{itemize}
+\end{itemize}
+
+\subsection{SIPHON \label{related:active-anal:siphon}}
+A case study \cite{study:siphon} on Scalable High-Interaction Physical Honeypots (SIPHON), similar to the study before, serving as a proof of concept in live Internet traffic observing the IOT related malicious intents. Leveraging Shodan to appear visible and legitimate in the eyes of malicious actors, the honeypots where based on real devices. The architecture is divided into physical IOT devices, wormholes exposed to the Internet forwarding to the IOT devices via the proxy forwarder. Technically are devices separated using VLANs 802.1Q and the wormhole to forwarder connection are via reverse ssh tunnels. As compromise countermeasures the suricata IPS and IDS features are enabled in the local netowork and periodic resets of IOT devices.
+
+They observed the influence of device listing in Shodan. The number of scans/connection attempts on the device has tripled between `one week before listing' and `one week after listing'. It proves that being visible by Shodan increases the possibility of attack reconnaissance on device at hand. Although, after two week after listing in Shodan, the connection attempts has decreased, which good piece of knowledge before implementation.

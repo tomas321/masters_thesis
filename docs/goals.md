@@ -11,3 +11,6 @@
 4. evaluate trends of attacker behavior
     - based on research of existing solutions
     - based on my intial research
+
+5. in case of dynamic environments.. get the pod restruction-to-receartion time ane other needed metrics
+    - minimal latency
