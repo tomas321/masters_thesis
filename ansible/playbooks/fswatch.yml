@@ -1,0 +1,116 @@
+---
+
+- hosts: k8s-cluster
+  become: true
+  vars:
+    fswatch_dependencies:
+      - git
+      - python3-pip
+    fswatch_pip_dependencies:
+      - cmake
+    fswatch_repo_url: "https://github.com/tomas321/fswatch"
+    fswatch_repo_branch: "develop"
+    fswatch_repo_dest: "/opt/fswatch"
+    fswatch_cmake_build_dir: "{{ fswatch_repo_dest }}/build"
+    fswatch_cmake_target: "fswatch"
+    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T" %I'
+    fswatch_services: []
+    sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
+    sneakpeek_repo_branch: "develop"
+    sneakpeek_repo_dest: "/tmp/sneakpeek"
+    sneakpeek_command: "{{ sneakpeek_repo_dest }}/sneakpeek.sh"
+    sneakpeek_host: localhost
+  tasks:
+    - name: install fswatch dependencies
+      apt:
+        update_cache: true
+        name: "{{ fswatch_dependencies }}"
+
+    - name: install fswatch pip dependencies
+      pip:
+        name: "{{ fswatch_pip_dependencies }}"
+
+    - name: clone fswatch repository
+      git:
+        repo: "{{ fswatch_repo_url }}"
+        version: "{{ fswatch_repo_branch }}"
+        dest: "{{ fswatch_repo_dest }}"
+      register: git_repo
+
+    - name: create build dir
+      when: git_repo.changed
+      file:
+        path: "{{ fswatch_cmake_build_dir }}"
+        state: directory
+
+    - name: cmake fswatch
+      when: git_repo.changed
+      command: >
+        cmake --target {{ fswatch_cmake_target }} {{ fswatch_repo_dest }}
+      args:
+        chdir: "{{ fswatch_cmake_build_dir }}"
+
+    - name: make fswatch
+      when: git_repo.changed
+      make:
+        chdir: "{{ fswatch_cmake_build_dir }}"
+        target: "{{ fswatch_cmake_target }}"
+        params:
+          --jobs: "{{ ansible_processor_cores * ansible_processor_threads_per_core }}"
+
+    - name: configure systemd unit file
+      template:
+        src: fswatch.service.j2
+        dest: /etc/systemd/system/fswatch@.service
+      register: unit_file
+
+    - name: clone sneakpeek to ansible host
+      become: false
+      delegate_to: "{{ sneakpeek_host }}"
+      run_once: true
+      git:
+        repo: "{{ sneakpeek_repo_url }}"
+        version: "{{ sneakpeek_repo_branch }}"
+        dest: "{{ sneakpeek_repo_dest }}"
+
+    - name: run sneakpeek
+      become: false
+      delegate_to: "{{ sneakpeek_host }}"
+      run_once: true
+      command: "{{ sneakpeek_command }}"
+
+    - name: retrieve all fswatch services
+      shell: "systemctl --type=service --state=active | grep fswatch.* | awk '{print $1}'"
+      register: systemd_services
+
+    - name: wirte systemd services to variable
+      set_fact:
+        fswatch_services: "{{ fswatch_services + systemd_services.stdout_lines }}"
+
+    - name: ran the following services
+      debug:
+        msg: "{{ fswatch_services }}"
+
+    - name: configure systemd target file
+      template:
+        src: fswatchers.target.j2
+        dest: /etc/systemd/system/fswatchers.target
+      register: systemd_target
+
+    - name: enable the service
+      when: "unit_file.changed or systemd_target.changed"
+      systemd:
+        daemon_reload: true
+        enabled: true
+        name: fswatchers.target
+
+    - name: restart fswatchers
+      when: "unit_file.changed or git_repo.changed"
+      systemd:
+        name: fswatchers.target
+        state: restarted
+
+    - name: ensre the fswatch service is started
+      systemd:
+        name: fswatchers.target
+        state: started

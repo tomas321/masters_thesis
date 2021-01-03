@@ -1,0 +1,6 @@
+[Unit]
+Description=FSwatchers
+Requires={{ fswatch_services | join(' ') }}
+
+[Install]
+WantedBy=multi-user.target

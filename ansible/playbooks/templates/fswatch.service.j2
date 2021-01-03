@@ -1,0 +1,7 @@
+[Unit]
+Description="watch changes in FS at %I"
+PartOf=fswatchers.target
+
+[Service]
+Restart=always
+ExecStart={{ fswatch_cmake_build_dir }}/fswatch/fswatch {{ fswatch_cmd_args }}
