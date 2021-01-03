@@ -1,0 +1,17 @@
+\chapter{Implementation \label{implementation}}
+
+\begin{itemize}[noitemsep]
+	\item 
+	Manage base setup of Kubernetes nodes via Vagrant.
+	\item 
+	Deployment of those Vagrant based virtual machines (including networking setup) and Kubernetes (via kubespray \footnote{\url{https://kubespray.io/}}) is done by Ansible.
+	\item 
+	Kubernetes environments are maintained \footnote{\url{https://github.com/tomas321/k8s-environment-scenarios}} separately.
+	\item
+	Sneakpeek \footnote{\url{https://github.com/tomas321/sneakpeek}} properly parses the docker container information. It groups nodes with user defined containers created by the Kubernetes orchestration from deployments and pods. Ultimately used for getting the container root FS directory.
+	\item
+	Fswatch \footnote{\url{https://github.com/tomas321/fswatch}} is a fork with simple improvements and features. It's ran on every acquired container root directory.
+	\item
+	All is automated with Ansible.	
+	
+\end{itemize}
