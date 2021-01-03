@@ -40,3 +40,18 @@ The client-side honeypot is deployed as a user application, which utilizes the s
 \subsection{Kernel Virtual Machine \label{anal:virtual:kvm}}
 
 \subsection{Kubernetes \label{anal:virtual:k8s}}
+
+\section{Environment monitoring \label{anal:mon}}
+Knowing what and how to extract and monitor is vital to understanding the threat actor and the agenda. There are various mechanisms and possibilities to effectively observe container file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
+
+\begin{itemize}[noitemsep]
+	\item
+	from the container in form of an agent reporting events
+	\item 
+	from the node as agent-less programs "spying" on the containers
+\end{itemize}
+
+Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is the transparency for the threat actor, since the container is observed from the hosting operating system. For example docker with the \textit{overlayfs} driver has a predefined directory for each container with the root FS.
+
+\subsection{Existing solutions \label{anal:mon:exist}}
+\texttt{Monks} \footnote{\url{https://github.com/alexandernst/monks}} works as a kernel module hijaking system calls on the target system. "Monks is like strace, but tracing all and every single process from any user, at any level" \cite{git:monks}. \texttt{execmon} \footnote{\url{https://github.com/kfiros/execmon}} is a similar utility intercepting the \textit{execve} syscalls in kernel and notifying the user. It's a kernel module combined with a user-land utility receiving events. For file system (FS) monitoring there is a CLI program \texttt{fswatch} \footnote{\url{https://github.com/emcrisostomo/fswatch}} acting as the API to the \textit{libfswatch}, which is ultimately an API to \textit{inotify}. It provides real time FS monitoring with the accuracy of one second. Fswatch distinguishes events based on the action (e.g. created, renamed, removed, owner changed).

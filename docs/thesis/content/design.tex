@@ -1,0 +1,17 @@
+\chapter{Design \label{design}}
+
+\section{Container monitoring \label{design:con-mon}}
+Monitoring a container means to effectively observe container file system, networking and process execution. Inspired by some related solutions, this section describes the monitoring mechanisms utilized in this thesis.
+
+\begin{itemize}
+	\item 
+	Points of enter, such as honeypots that lure the threat actors to the environment. Could be local to the environment or remote anywhere in the Internet.
+	\item 
+	3 Ubuntu server nodes are the base to Kubernetes cluster holding and orchestrating the whole environment.
+	\item 
+	There are to be multiple environments.
+	\item
+	Any environment is automated and deployed to the cluster via Ansible playbooks.
+	\item 
+	The core monitoring tools and programs are deployed on the hosting nodes
+\end{itemize}

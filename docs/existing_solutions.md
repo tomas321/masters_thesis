@@ -38,10 +38,10 @@ Droidbox introduces a simple way of analyzing android applications via an existi
 
 ## Virustotal
 
-Similarly to cuckoo, virustotal utilizes both static and dynamic malware analysis. "VirusTotal's aggregated data is the output of many different antivirus  engines, website scanners, file and URL analysis tools, and user  contributions" [[link](https://support.virustotal.com/hc/en-us/articles/115002126889-How-it-works)].
+Similarly to cuckoo, virustotal utilizes both static and dynamic malware analysis. "VirusTotal's aggregated data is the output of many different antivirus  engines, website scanners, file and URL analysis tools, and user  contributions" \[[link](https://support.virustotal.com/hc/en-us/articles/115002126889-How-it-works)\].
 
 ## Falcon sandbox
-A direct concurrency to virustoal is the [Hybrid Analysis](hybrid-analysis.com) tool powered by the Falcon sandbox. Again, it's similar to cuckoo, except the anti-evasion feature [[blog](https://inquest.net/blog/2018/03/12/defense-in-depth-detonation-technologies)], which allows, even sandbox-aware malware, to be analyzed despite their evasion techniques.
+A direct concurrency to virustoal is the [Hybrid Analysis](hybrid-analysis.com) tool powered by the Falcon sandbox. Again, it's similar to cuckoo, except the anti-evasion feature \[[blog](https://inquest.net/blog/2018/03/12/defense-in-depth-detonation-technologies)\], which allows, even sandbox-aware malware, to be analyzed despite their evasion techniques.
 
 ## [more sandbox realted malware analysis tools](https://www.g2.com/categories/malware-analysis-tools?utf8=%E2%9C%93&order=top_shelf)
 
@@ -67,7 +67,7 @@ This solution does not introduce any isolation techniques beside utilizing virtu
 
 ## [Honeypoint](https://www.microsolved.com/honeypoint) by microsolved inc.
 
-Service emulation is what Honeypoint utilizes to lure malicious actors and detect their agenda. Production services lie in the same environment as the robust architecture of Honeypoint, which can mimic a complex network environment for deceiving an attacker. The Microsolved CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the Internet regardless of possible domain - randomly trying IP addresses and looking for a services ought to have malicious intent. Consists of various components that could be replicated in the Kubernetes architecture design [[what is honeypoint](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/)].
+Service emulation is what Honeypoint utilizes to lure malicious actors and detect their agenda. Production services lie in the same environment as the robust architecture of Honeypoint, which can mimic a complex network environment for deceiving an attacker. The Microsolved CEO Brent Huston [claims](https://www.podbean.com/media/share/pb-cgwhv-ad161e?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share) that having a honeypot is a great deception technology with almost no false positives, since it is expected that no legitimate user iteracts with it. It means that any recorded activity should be considered suspicious, if the honeypot targets malicious actors scanning the Internet regardless of possible domain - randomly trying IP addresses and looking for a services ought to have malicious intent. Consists of various components that could be replicated in the Kubernetes architecture design \[[what is honeypoint](https://stateofsecurity.com/what-is-this-honeypoint-thing-anyway/)\].
 
 ## [Cybertrap](https://cybertrap.com/solutions/#endpointdeception)
 
