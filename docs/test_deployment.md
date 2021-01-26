@@ -41,9 +41,9 @@ virt-install --virt-type kvm --name node.kub.local --memory 8192 --cdrom ubuntu-
 
 ### Nodes
 
-- `m1.k8s.dev.local` - 10.0.0.1/24
-- `n1.k8s.dev.local` - 10.0.0.2/24
-- `n2.k8s.dev.local` - 10.0.0.3/24
+- `m1.k8s.dev.local` - 10.0.0.2/24
+- `n1.k8s.dev.local` - 10.0.0.3/24
+- `n2.k8s.dev.local` - 10.0.0.4/24
 
 ### Vagrant
 
@@ -53,7 +53,7 @@ All is configured in the [k8s Vagrantfile](../provisioner/vagrant/Vagrantfile), 
 Before running the below playbooks, it requires installing and setting up a KVM via [setup kvm playbook](../ansible/playbook/setup_kvm.yml).
 
 Two playbooks for starting and halting the k8s nodes:
-- [vagrant k8s up playbook](../ansible/playbooks/provisioner/vagrant_up.yml)
+- [vagrant k8s up playbook](../ansible/playbooks/vagrant_k8s_up.yml)
     - installs vagrant package
     - configures the network bridge for the k8s nodes via the [ansible-config-interfaces](../ansible/roles/ansible-config-interfaces) role
         ```bash
@@ -63,7 +63,7 @@ Two playbooks for starting and halting the k8s nodes:
         ```
     - runs `vagrant up` in the `provisioner/vagrant/` directory
 
-- [vagrant k8s halt playbook](../ansible/playbooks/provisioner/vagrant_down.yml)
+- [vagrant k8s halt playbook](../ansible/playbooks/vagrant_k8s_down.yml)
     - removes the network bridge
     - resets the networking configuration
     - runs `vagrant halt` int the `provisioner/vagrant/` directory

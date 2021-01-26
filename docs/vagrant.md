@@ -16,7 +16,22 @@
 
 ### building a custom box
 
-[packer](https://github.com/hashicorp/packer) by hashicorp for building custom images
+create box using a vagrant-specific solution ([source](https://scotch.io/tutorials/how-to-create-a-vagrant-base-box-from-an-existing-one)):
+
+1. create a Vagrantfile from a desired base Vagrant box
+    - optionally create a simple Vagrantfile running `vagrant init <vagrant_box>`
+
+2. run `vagrant up && vagrant ssh` and make all custom changes e.g. pkg installations, config changes, etc.
+3. shrink down the future box size
+    - `apt clean`
+    - `dd if=/dev/zero of=/EMPTY bs=1M && rm -f /EMPTY`\
+
+4. `cat /dev/null > ~/.bash_history && history -c && exit` - clear up traces
+5. in the host machine package the VM to vagrant box - `vagrant package --output NAME.box`
+6. add the the box to your local box registry - `vagrant box add custom-box NAME.box`
+7. destroy the vagrant managed VM
+
+alternatively look at [packer](https://github.com/hashicorp/packer) by hashicorp for building custom images
 
 ## project setup
 
