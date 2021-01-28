@@ -1,0 +1,60 @@
+---
+
+# setup metal loadbalancer as is described in
+# 'https://metallb.universe.tf/installation/'
+
+- name: set the strictARP setting to TRUE
+  become: true
+  become_user: "{{ kubectl_user }}"
+  shell: >
+    kubectl get configmap kube-proxy -n kube-system -o yaml |
+    sed -e "s/strictARP: false/strictARP: true/" |
+    kubectl diff -f - -n kube-system
+  register: kubectl_diff
+  failed_when: kubectl_diff.rc > 1
+  changed_when: kubectl_diff.rc == 1
+
+- name: create the metallb specific namespace
+  become: true
+  become_user: "{{ kubectl_user }}"
+  shell: >
+    kubectl apply -f
+    https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/namespace.yaml
+  register: metallb_namespace
+  changed_when: "'created' in metallb_namespace.stdout"
+
+- name: create all metallb resources
+  become: true
+  become_user: "{{ kubectl_user }}"
+  shell: >
+    kubectl apply -f
+    https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/metallb.yaml
+  register: metallb_resources
+  changed_when: "'created' in  metallb_resources.stdout"
+
+- name: check if secret key was created
+  become: true
+  become_user: "{{ kubectl_user }}"
+  shell: >
+    kubectl get secrets -n metallb-system | grep memberlist
+  register: metallb_secret
+  changed_when: false
+
+- name: create memberlist secret when not created yet
+  when: metallb_secret.rc != 0
+  become: true
+  become_user: "{{ kubectl_user }}"
+  shell: >
+    kubectl create secret generic -n metallb-system memberlist
+    --from-literal=secretkey="$(openssl rand -base64 128)"
+  register: metallb_memberlist_secret
+  changed_when: "'created' in  metallb_memberlist_secret.stdout"
+
+- name: create address pool configmap
+  become: true
+  become_user: "{{ kubectl_user }}"
+  command: kubectl apply -f -
+  args:
+    stdin: "{{ metallb_configmap | to_json }}"
+  register: metallb_configmap_cmd
+  changed_when: "'created' in metallb_configmap_cmd.stdout"
