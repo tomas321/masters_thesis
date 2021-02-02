@@ -38,6 +38,7 @@
   shell: >
     kubectl get secrets -n metallb-system | grep memberlist
   register: metallb_secret
+  failed_when: false
   changed_when: false
 
 - name: create memberlist secret when not created yet
