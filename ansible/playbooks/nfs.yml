@@ -18,7 +18,7 @@
           - no_subtree_check
           - no_root_squash
 
-- hosts: m1.k8s.dev.local
+- hosts: k8s-master
   roles:
     - role: nfs
       vars:

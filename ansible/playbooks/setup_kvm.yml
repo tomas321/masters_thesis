@@ -1,6 +1,6 @@
 ---
 
-- hosts: localhost
+- hosts: k8s-host
   vars:
     custom_pool_path: "/var/lib/libvirt/k8s_images"
   pre_tasks:

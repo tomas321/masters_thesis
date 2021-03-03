@@ -1,5 +1,5 @@
 ---
 
-- hosts: m1.k8s.dev.local
+- hosts: k8s-master
   roles:
     - metallb
