@@ -1,35 +1,61 @@
 ---
 
 - hosts: k8s-host
-  vars:
-    bridge: mybr0
-    dependencies:
-      - vagrant
-      - ifupdown
   pre_tasks:
-    - name: install vagrant
+    - name: install vagrant dependencies
       become: true
       package:
         name: "{{ item }}"
         state: present
-      loop: "{{ dependencies }}"
+      loop: "{{ vagrant_dependencies }}"
       tags: install
+
+    - name: ensure /opt/k8s-vagrant dir exists
+      become: true
+      file:
+        path: "{{ vagrant_k8s.dir }}"
+        state: directory
+        owner: "{{ vagrant_k8s.owner }}"
+        group: "{{ vagrant_k8s.group }}"
+
+    - name: copy Vagrantfile to k8s-host
+      copy:
+        src: "{{ vagrant_vagrantfile_path }}"
+        dest: "{{ vagrant_k8s.dir }}/Vagrantfile"
+
+    - name: copy existing ssh key pair
+      copy:
+        src: "{{ item.value }}"
+        dest: "~/.ssh/"
+        mode: 0600
+      with_dict: "{{ vagrant_ssh_key }}"
+      register: __ssh_keys
+
+    - name: create .env file for future usage
+      blockinfile:
+        path: "{{ vagrant_k8s.dir }}/environment.rb"
+        create: true
+        block: |
+          K8S_NETWORK_BRIDGE_NAME = "{{ vagrant_vms_bridge.name }}"
+          K8S_NODES_NET_PREFIX = "{{ vagrant_vms_bridge.ip.split('.')[:-1] | join('.') }}."
+          K8S_DOMAIN = "{{ k8s_nodes_domain }}"
+          K8S_SSH_PUBLIC_KEY_PATH = "{{ (__ssh_keys.results[0].item.key == 'public') | ternary(__ssh_keys.results[0].dest, __ssh_keys.results[1].dest) | replace(ansible_env.HOME, '~') }}"
   roles:
     - role: ansible-config-interfaces
       vars:
         config_network_interfaces: true
         network_interfaces:
-          - name: "{{ bridge }}"
+          - name: "{{ vagrant_vms_bridge.name }}"
             configure: true
             enable: true
             method: static
-            address: 10.0.0.1
-            netmask: 255.255.255.0
+            address: "{{ vagrant_vms_bridge.ip }}"
+            netmask: "{{ vagrant_vms_bridge.mask }}"
             parameters:
               - param: pre-up
-                val: "ip link add {{ bridge }} type bridge"
+                val: "ip link add {{ vagrant_vms_bridge.name }} type bridge"
   post_tasks:
     - name: start k8s nodes
-      command: "vagrant up"
+      shell: "vagrant up"
       args:
-        chdir: ../../provisioner/vagrant/
+        chdir: "{{ vagrant_k8s.dir }}"

@@ -2,20 +2,19 @@
 
 - hosts: k8s-host
   vars:
-    bridge: mybr0
     etc_network_interfaces: |
       auto lo
       iface lo inet loopback
   tasks:
-    - name: check {{ bridge }} exists
+    - name: check {{ vagrant_vms_bridge.name }} exists
       failed_when: false
-      command: "ip link show {{ bridge }}"
+      command: "ip link show {{ vagrant_vms_bridge.name }}"
       register: bridge_presence
 
     - name: remove bridge
       become: true
       when: bridge_presence.rc == 0
-      command: "ip link del {{ bridge }}"
+      command: "ip link del {{ vagrant_vms_bridge.name }}"
 
     - name: reset the etc_network_interfaces
       become: true
@@ -30,6 +29,6 @@
         state: restarted
 
     - name: halt k8s nodes
-      command: "vagrant halt"
+      shell: "vagrant halt"
       args:
-        chdir: ../../provisioner/vagrant/
+        chdir: "{{ vagrant_k8s.dir }}"

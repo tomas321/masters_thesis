@@ -2,6 +2,8 @@
 # vi: set ft=ruby :
 #
 # configuration options: https://www.vagrantup.com/docs/vagrantfile
+require './environment'
+
 
 ENV["LC_ALL"] = "en_US.UTF-8"
 
@@ -10,9 +12,55 @@ BOX_DISTRO = "generic/ubuntu1804"
 MASTER_NODE_COUNT = 1
 WORKER_NODE_COUNT = 2
 DATA_NODE_COUNT = 1
-IP_COUNTER = 1
+$ip_counter = 1
+
+if not defined?('K8S_DOMAIN')
+    STDERR.puts("undefined 'K8S_DOMAIN' environment (required format: 'dom.subdom.tld')")
+    exit(false)
+else
+    $k8s_domain = K8S_DOMAIN
+end
+
+if not defined?('K8S_SSH_PUBLIC_KEY_PATH')
+    STDERR.puts("undefined 'K8S_SSH_PUBLIC_KEY_PATH' environment")
+    exit(false)
+else
+    $public_key_path = K8S_SSH_PUBLIC_KEY_PATH
+end
+
+if not defined?('K8S_NODES_NET_PREFIX')
+    STDERR.puts("undefined 'K8S_NODES_NET_PREFIX' environment (required format: '10.2.1.')")
+    exit(false)
+else
+    $ip_prefix = K8S_NODES_NET_PREFIX
+end
+
+if not defined?('K8S_NETWORK_BRIDGE_NAME')
+    STDERR.puts("undefined 'K8S_NETWORK_BRIDGE_NAME' environment")
+    exit(false)
+else
+    $network_bridge = K8S_NETWORK_BRIDGE_NAME
+end
 
 Vagrant.require_version ">= 2.0.0"
+
+def create_node(config, prefix, i, ip)
+    short_prefix = prefix[0]
+    config.vm.define "#{prefix}-#{i}" do |node|
+        node.vm.hostname = "#{short_prefix}#{i}.#{$k8s_domain}"
+        node.vm.network :public_network,
+            :dev => $network_bridge,
+            :mode => "bridge",
+            :type => "bridge",
+            :ip => ip
+        node.vm.post_up_message = "#{prefix} #{i} started"
+        node.vm.provision "file", source: $public_key_path, destination: "~/.ssh/id_k8s_host.pub"
+        node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
+        # node.vm.provider :libvirt do |libvirt|
+        #     libvirt.memory = 2048
+        # end
+    end
+end
 
 Vagrant.configure("2") do |config|
     config.vm.box = BOX_DISTRO
@@ -26,52 +74,22 @@ Vagrant.configure("2") do |config|
 
     # master nodes
     (1..MASTER_NODE_COUNT).each do |i|
-        IP_COUNTER += 1
-        config.vm.define "master-#{i}" do |master|
-            master.vm.hostname = "m#{i}.k8s.dev.local"
-            master.vm.network :public_network,
-                :dev => "mybr0",
-                :mode => "bridge",
-                :type => "bridge",
-                :ip => "10.0.0.#{IP_COUNTER}"
-            master.vm.post_up_message = "Master node #{i} started"
-            master.vm.provision "file", source: "~/.ssh/id_vagrant_k8s.pub", destination: "~/.ssh/id_k8s_host.pub"
-            master.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
-        end
+        $ip_counter += 1
+        ip = "#{$ip_prefix}#{$ip_counter}"
+        create_node(config, "master", i, ip)
     end
 
     # worker nodes
     (1..WORKER_NODE_COUNT).each do |i|
-        IP_COUNTER += 1
-        config.vm.define "node-#{i}" do |node|
-            node.vm.hostname = "n#{i}.k8s.dev.local"
-            node.vm.network :public_network,
-                :dev => "mybr0",
-                :mode => "bridge",
-                :type => "bridge",
-                :ip => "10.0.0.#{IP_COUNTER}"
-            node.vm.post_up_message = "Worker node #{i} started"
-            node.vm.provision "file", source: "~/.ssh/id_vagrant_k8s.pub", destination: "~/.ssh/id_k8s_host.pub"
-            node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
-        end
+        $ip_counter += 1
+        ip = "#{$ip_prefix}#{$ip_counter}"
+        create_node(config, "node", i, ip)
     end
 
     # data node simulating remote storage server
     (1..DATA_NODE_COUNT).each do |i|
-        IP_COUNTER += 1
-        config.vm.define "data-#{i}" do |node|
-            node.vm.hostname = "data#{i}.k8s.dev.local"
-            node.vm.network :public_network,
-                :dev => "mybr0",
-                :mode => "bridge",
-                :type => "bridge",
-                :ip => "10.0.0.#{IP_COUNTER}"
-            node.vm.post_up_message = "Data node #{i} started"
-            node.vm.provision "file", source: "~/.ssh/id_vagrant_k8s.pub", destination: "~/.ssh/id_k8s_host.pub"
-            node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
-            node.vm.provider :libvirt do |libvirt|
-                libvirt.memory = 2048
-            end
-        end
+        $ip_counter += 1
+        ip = "#{$ip_prefix}#{$ip_counter}"
+        create_node(config, "data", i, ip)
     end
 end
