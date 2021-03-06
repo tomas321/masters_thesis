@@ -1,0 +1,69 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+    - name: apt install dependencies
+      apt:
+        name: "{{ item }}"
+        update_cache: true
+        state: present
+      loop:
+        - apt-transport-https
+        - gnupg2
+        - curl
+
+    - name: add apt key
+      apt_key:
+        url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+        state: present
+
+    - name: add apt repo
+      apt_repository:
+        repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+        filename: "/etc/apt/sources.list.d/kubernetes"
+
+    - name: install kubectl
+      apt:
+        name: kubectl
+        state: present
+
+    - name: check if kubectl is configured
+      become: true
+      stat:
+        path: "{{ ansible_env.HOME }}/.kube/config"
+      register: kubectl_config
+
+    - name: configure kubectl
+      when: not kubectl_config.stat.exists
+      block:
+        - name: retrieve the .kube/config from master
+          delegate_to: m1.k8s-host.local
+          become: true
+          fetch:
+            src: "{{ ansible_env.HOME }}/.kube/config"
+            dest: /tmp/.kube/
+            flat: true
+
+        - name: copy the configuration to host
+          become: true
+          copy:
+            src: /tmp/.kube/config
+            dest: "{{ ansible_env.HOME }}/.kube/"
+
+        - name: remove the residual tmp file
+          file:
+            path: /tmp/.kube
+            state: absent
+
+    - name: install bash-completion
+      apt:
+        name: bash-completion
+        state: present
+      register: bash_completion_pkg
+
+    - name: generate kubectl bash completion script
+      when: bash_completion_pkg.changed
+      become: true
+      shell: "kubectl completion bash > /etc/bash_completion.d/kubectl.sh"
+      register: kubectl_bash_completion
