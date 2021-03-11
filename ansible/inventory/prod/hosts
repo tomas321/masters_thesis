@@ -6,7 +6,7 @@ all:
     m1.k8s-host.local:
     n1.k8s-host.local:
     n2.k8s-host.local:
-    data1.k8s-host.local:
+    d1.k8s-host.local:
     k8s-host.local:
   vars:
     ansible_connection: ssh
@@ -33,6 +33,6 @@ all:
             n2.k8s-host.local:
         data-storage:
           hosts:
-            data1.k8s-host.local:
+            d1.k8s-host.local:
       vars:
         ansible_user: vagrant
