@@ -1,0 +1,7 @@
+---
+# defaults file for bcc
+
+bcc_repo:
+  url: "https://github.com/iovisor/bcc"
+  version: master
+  dest: /opt/bcc

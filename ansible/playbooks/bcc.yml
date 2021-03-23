@@ -1,0 +1,18 @@
+---
+
+- hosts: k8s-cluster
+  name: install bpftool for current kernel
+  become: true
+  tasks:
+    - name: install linux tools packages
+      apt:
+        name: "{{ item }}"
+      loop:
+        - linux-tools-common
+        - "linux-tools-{{ ansible_kernel }}"
+
+- hosts: k8s-cluster
+  name: install BCC from source
+  become: true
+  roles:
+    - bcc
