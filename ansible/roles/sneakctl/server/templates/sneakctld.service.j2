@@ -1,0 +1,7 @@
+[Unit]
+Description="sneakctl API server"
+
+[Service]
+Restart=always
+Environment="FLASK_ENV={{ sneakctl_server_flask_env }}"
+ExecStart={{ sneakctl_server_venv_path }}/bin/python {{ sneakctl_server_flask_app_path }}

@@ -1,0 +1,65 @@
+---
+
+- name: install dependencies
+  apt:
+    name:
+      - python3-pip
+      - python3-venv
+
+- name: clone sneakctl_server repo
+  git:
+    repo: "{{ sneakctl_server_repo.url }}"
+    version: "{{ sneakctl_server_repo.version | default(omit) }}"
+    dest: "{{ sneakctl_server_repo.dest }}"
+    force: "{{ sneakctl_server_repo.force_clone | default(omit) }}"
+
+- name: configure sneakctl server
+  template:
+    src: config.yml.j2
+    dest: "{{ sneakctl_server_repo.dest }}/config/etc/sneakctl_server/config.yml"
+
+- name: run configure.sh
+  shell: >
+    ./configure.sh {{ (sneakctl_server_flask_env == 'development') | ternary('dev', 'prod') }}
+  args:
+    chdir: "{{ sneakctl_server_repo.dest }}"
+  changed_when: false
+
+- name: install in python virtualenv
+  pip:
+    name: .
+    state: present
+    chdir: "{{ sneakctl_server_repo.dest }}"
+    virtualenv: "{{ sneakctl_server_repo.dest }}/venv"
+    virtualenv_command: "{{ ansible_python.executable }} -m venv"
+  register: pip_pkg
+
+- set_fact:
+    sneakctl_server_venv_path: "{{ pip_pkg.virtualenv }}"
+
+- when: sneakctl_server_flask_app_path is not defined
+  set_fact:
+    sneakctl_server_flask_app_path: "{{ sneakctl_server_repo.dest }}/app.py"
+
+- name: copy sneakctl_server systemd unit file
+  template:
+    src: sneakctld.service.j2
+    dest: /etc/systemd/system/sneakctl_server.service
+  register: systemd_service
+
+- name: systemd daemon reload
+  when: systemd_service.changed
+  systemd:
+    daemon_reload: true
+
+- name: restart sneakctl_service service
+  when: pip_pkg.changed
+  systemd:
+    name: sneakctl_server
+    state: restarted
+
+- name: start and enable systemd service
+  systemd:
+    name: sneakctl_server
+    enabled: true
+    state: started

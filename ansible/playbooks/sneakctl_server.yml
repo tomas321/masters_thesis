@@ -1,0 +1,9 @@
+---
+
+- hosts: k8s-cluster
+  become: true
+  roles:
+    - role: sneakctl/server
+      vars:
+        sneakctl_server_repo:
+          version: master  # installs the latest release

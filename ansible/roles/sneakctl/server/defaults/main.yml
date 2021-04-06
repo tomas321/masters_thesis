@@ -1,0 +1,19 @@
+---
+
+sneakctl_server_repo:
+  url: https://github.com/tomas321/sneakctl_server
+  version: master
+  dest: /opt/sneakctl_server
+  # force_clone: true
+
+sneakctl_server_flask_env: development
+
+sneakctl_server_config:
+  host: 0.0.0.0
+  port: 5000
+  redis:
+    host: redis
+    port: 6379
+    db: 0
+    # user: redis
+    # password: r3di5
