@@ -1,0 +1,6 @@
+[Unit]
+Description="All execsnoop services"
+Requires={{ execsnoop_services | join(' ') }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# start execsnoop for a given mount namespace map
+#
+# USAGE: $0 EXECSNOOP_MNTNSMAP_OPTION
+#
+
+usage="USAGE: $0 EXECSNOOP_MNTNSMAP_OPTION"
+[[ $# -lt 1 ]] && echo -e "error: bad number of args\n$usage" >/dev/stderr && exit 1
+
+mntnsmap="$1"
+
+sudo docker ps -f "id=${mntnsmap##*_}"
+
+{{ execsnoop_executable }} {{ execsnoop_cmd_args }} --mntnsmap "$mntnsmap"

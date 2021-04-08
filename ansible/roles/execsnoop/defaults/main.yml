@@ -1,0 +1,10 @@
+---
+# defaults for execsnoop role
+
+execsnoop_executable: /usr/share/bcc/tools/execsnoop
+execsnoop_cmd_args: "-t -T"
+
+execsnoop_caller_script_abspath: /usr/local/bin/execsnoop/execsnoop_caller.sh
+execsnoop_bpfmap_basepath: /sys/fs/bpf
+
+execsnoop_log_abspath: /var/log/execsnoop/execs.log

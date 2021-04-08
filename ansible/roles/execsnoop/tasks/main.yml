@@ -1,0 +1,59 @@
+---
+
+- name: create execsnoop systemd service
+  template:
+    src: execsnoop.service.j2
+    dest: /etc/systemd/system/execsnoop@.service
+  register: unit_file
+
+- name: reload systemd daemon
+  when: unit_file.changed
+  systemd:
+    daemon-reload: true
+
+- name: create execsnoop related directories
+  file:
+    path: "{{ item.split('/')[:-1] | join('/') }}"
+    state: directory
+  loop:
+    - "{{ execsnoop_caller_script_abspath }}"
+    - "{{ execsnoop_log_abspath }}"
+
+- name: copy execsnoop caller script
+  template:
+    src: execsnoop_caller.sh.j2
+    dest: "{{ execsnoop_caller_script_abspath }}"
+    mode: 0750
+
+- name: configure rsyslog for execsnoop services
+  template:
+    src: execsnoop_logging.conf.j2
+    dest: /etc/rsyslog.d/execsnoop.conf
+  register: rsyslog_config
+
+- name: set correct permissions to the log file
+  file:
+    path: "{{ execsnoop_log_abspath }}"
+    owner: syslog
+    group: adm
+    mode: 0640
+
+- name: restart rsyslog
+  when: rsyslog_config.changed
+  systemd:
+    name: rsyslog
+    state: restarted
+
+# XXX: requires knowing the services beforehand.. not designed in that way yet
+# - name: create execsnoops systemd target
+#   template:
+#     src: execsnoops.target.j2
+#     dest: /etc/systemd/system/execsnoops.target
+#
+# - name: retrieve all execsnoop services
+#   shell: >
+#     systemctl --type=service --state=active | grep execsnoop.* | awk '{print $1}'
+#   register: systemd_services
+#
+# - set_fact:
+#     execsnoop_services: "{{ execsnoop_services + systemd_services.stdout_lines }}"
