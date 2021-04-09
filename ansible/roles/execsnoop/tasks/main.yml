@@ -1,5 +1,8 @@
 ---
 
+- name: setup cron
+  include_tasks: cron.yml
+
 - name: create execsnoop systemd service
   template:
     src: execsnoop.service.j2
@@ -13,11 +16,11 @@
 
 - name: create execsnoop related directories
   file:
-    path: "{{ item.split('/')[:-1] | join('/') }}"
+    path: "{{ item }}"
     state: directory
   loop:
-    - "{{ execsnoop_caller_script_abspath }}"
-    - "{{ execsnoop_log_abspath }}"
+    - "{{ execsnoop_scripts_dir }}"
+    - "{{ execsnoop_log_abspath.split('/')[:-1] | join('/') }}"
 
 - name: copy execsnoop caller script
   template:

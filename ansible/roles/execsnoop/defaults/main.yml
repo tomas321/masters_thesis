@@ -4,7 +4,13 @@
 execsnoop_executable: /usr/share/bcc/tools/execsnoop
 execsnoop_cmd_args: "-t -T"
 
-execsnoop_caller_script_abspath: /usr/local/bin/execsnoop/execsnoop_caller.sh
+execsnoop_scripts_dir: /usr/local/bin/execsnoop
+
 execsnoop_bpfmap_basepath: /sys/fs/bpf
 
 execsnoop_log_abspath: /var/log/execsnoop/execs.log
+
+# cron related variables
+execsnoop_cron_time:
+  minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
+  # hour: '0-23'
