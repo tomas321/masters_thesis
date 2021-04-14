@@ -16,7 +16,7 @@
 - name: configure sneakctl server
   template:
     src: config.yml.j2
-    dest: "{{ sneakctl_server_repo.dest }}/config/etc/sneakctl_server/config.yml"
+    dest: "{{ sneakctl_server_repo.dest }}/config/etc/sneakctl-server/config.yml"
 
 - name: run configure.sh
   shell: >
@@ -44,7 +44,7 @@
 - name: copy sneakctl_server systemd unit file
   template:
     src: sneakctld.service.j2
-    dest: /etc/systemd/system/sneakctl_server.service
+    dest: /etc/systemd/system/sneakctl-server.service
   register: systemd_service
 
 - name: systemd daemon reload
