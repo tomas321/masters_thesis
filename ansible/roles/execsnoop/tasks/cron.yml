@@ -10,6 +10,6 @@
 - name: ensure the cronjob exists
   cron:
     name: "clean execsnoop bpfmaps"
-    job: "{{ execsnoop_cron_script_abspath }} 2>&1 | /usr/bin/logger -t execsnoop_cron_check_output"
+    job: "{{ execsnoop_cron_script_abspath }} 2>&1 | /usr/bin/logger -t execsnoop_cron_check"
     minute: "{{ execsnoop_cron_time.minute | default(omit) }}"
     hour: "{{ execsnoop_cron_time.hour | default(omit) }}"

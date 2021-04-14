@@ -7,4 +7,4 @@ Restart=always
 ExecStart={{ execsnoop_caller_script_abspath }} {{ execsnoop_bpfmap_basepath | regex_replace('\\/$', '') }}/%i
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=execsnoop
+SyslogIdentifier=execsnoop_%i

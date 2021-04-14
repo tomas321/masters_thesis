@@ -14,32 +14,31 @@
   systemd:
     daemon-reload: true
 
-- name: create execsnoop related directories
+- name: create execsnoop script directory
   file:
-    path: "{{ item }}"
+    path: "{{ execsnoop_scripts_dir }}"
     state: directory
-  loop:
-    - "{{ execsnoop_scripts_dir }}"
-    - "{{ execsnoop_log_abspath.split('/')[:-1] | join('/') }}"
+
+# the syslog subdir must be writable by syslog
+- name: create execsnoop syslog base dir
+  file:
+    path: "{{ execsnoop_log_basepath }}"
+    state: directory
+    group: syslog
+    mode: 0775
 
 - name: copy execsnoop caller script
   template:
     src: execsnoop_caller.sh.j2
     dest: "{{ execsnoop_caller_script_abspath }}"
     mode: 0750
+  register: caller_script
 
 - name: configure rsyslog for execsnoop services
   template:
     src: execsnoop_logging.conf.j2
-    dest: /etc/rsyslog.d/execsnoop.conf
+    dest: /etc/rsyslog.d/30-execsnoop.conf
   register: rsyslog_config
-
-- name: set correct permissions to the log file
-  file:
-    path: "{{ execsnoop_log_abspath }}"
-    owner: syslog
-    group: adm
-    mode: 0640
 
 - name: restart rsyslog
   when: rsyslog_config.changed
@@ -52,11 +51,20 @@
 #   template:
 #     src: execsnoops.target.j2
 #     dest: /etc/systemd/system/execsnoops.target
-#
-# - name: retrieve all execsnoop services
-#   shell: >
-#     systemctl --type=service --state=active | grep execsnoop.* | awk '{print $1}'
-#   register: systemd_services
-#
-# - set_fact:
-#     execsnoop_services: "{{ execsnoop_services + systemd_services.stdout_lines }}"
+
+- name: restart all execsnoop services when systemd template is changed
+  when: unit_file.changed or caller_script.changed
+  block:
+    - name: retrieve all execsnoop services
+      shell: >
+        systemctl --type=service --state=active | grep execsnoop.* | awk '{print $1}'
+      register: systemd_services
+
+    - set_fact:
+        execsnoop_services: "{{ execsnoop_services + systemd_services.stdout_lines }}"
+
+    - name: restart all execsnoop services
+      systemd:
+        name: "{{ item | replace('.service', '') }}"
+        state: restarted
+      loop: "{{ execsnoop_services }}"

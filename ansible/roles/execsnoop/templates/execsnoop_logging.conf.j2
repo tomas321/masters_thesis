@@ -1,2 +1,5 @@
-if $programname == 'execsnoop' then {{ execsnoop_log_abspath }}
+$template dynamicFile,"{{ execsnoop_log_basepath }}/%programname%.log"
+
+if $programname == 'execsnoop_cron_check' then {{ execsnoop_log_basepath }}/admin.log
+else if $programname startswith 'execsnoop' then ?dynamicFile
 & stop

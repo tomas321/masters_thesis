@@ -8,7 +8,7 @@ execsnoop_scripts_dir: /usr/local/bin/execsnoop
 
 execsnoop_bpfmap_basepath: /sys/fs/bpf
 
-execsnoop_log_abspath: /var/log/execsnoop/execs.log
+execsnoop_log_basepath: /var/log/execsnoop
 
 # cron related variables
 execsnoop_cron_time:
