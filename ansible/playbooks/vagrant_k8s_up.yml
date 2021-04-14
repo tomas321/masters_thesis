@@ -10,7 +10,7 @@
       loop: "{{ vagrant_dependencies }}"
       tags: install
 
-    - name: ensure /opt/k8s-vagrant dir exists
+    - name: ensure {{ vagrant_k8s.dir }} dir exists
       become: true
       file:
         path: "{{ vagrant_k8s.dir }}"

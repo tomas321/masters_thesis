@@ -1,0 +1,22 @@
+---
+
+vagrant_dependencies:
+  - vagrant
+  - ifupdown
+
+vagrant_vms_bridge:
+  name: mybr0
+  ip: 10.0.0.1  # must be a .1/24 IP
+  mask: 255.255.255.0
+
+vagrant_k8s:
+  dir: /opt/k8s_vagrant
+  owner: "{{ ansible_user }}"
+  group: "{{ ansible_user }}"
+
+vagrant_vagrantfile_path: "../../provisioner/vagrant/Vagrantfile"
+vagrant_ssh_key:
+  private: ".ssh/id_vagrant_k8s"
+  public: ".ssh/id_vagrant_k8s.pub"
+
+k8s_nodes_domain: k8s-host.local
