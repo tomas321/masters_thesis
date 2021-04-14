@@ -10,6 +10,4 @@ usage="USAGE: $0 EXECSNOOP_MNTNSMAP_OPTION"
 
 mntnsmap="$1"
 
-sudo docker ps -f "id=${mntnsmap##*_}"
-
 {{ execsnoop_executable }} {{ execsnoop_cmd_args }} --mntnsmap "$mntnsmap"
