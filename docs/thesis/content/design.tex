@@ -1,4 +1,73 @@
 \chapter{Design \label{design}}
+This chapter focuses on the overall design of the solution, depicting the crucial parts. Firstly, the base system of the monitored environment. Secondly, container remotely controlled event-based monitoring of processes, file system changes and networking. Thirdly, deployment and emplacement of the isolated environment and additionally connecting it over network in a target facility or system.
+
+\section{Specification \label{design:specs}}
+This short section summarizes all specifications and assumptions considering the design. The target operating system is always Linux distribution Ubuntu 18.04.5+ with hardware enablement (HWE) or 20.04.x. The kernel specification is important for the machine hosting VMs. In addition, the KVM (with QEMU) is used with the libvirt management library, which fully satisfies the choice of virtualization technology.
+
+\section{Environment architecture \label{design:env-arch}}
+The environment has a solid underlying architecture considering a proper isolation layer and other prevention mechanisms to secure the hosting system. The main goal is a mimicking production environment build atop of Kubernetes cluster. Sequentially, this section covers all in a bottom-up fashion to Kubernetes cluster design.
+
+\subsection{Base system \label{design:env-arch:base}}
+The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriving from a Kubernetes cluster design in production environment, which often isn't a single-node architecture, the base system must be a set of coexisting VMs. Choosing the right number of VMs with respect to the overall resource capacity is not in scope of this thesis. Nevertheless, there will three base VMs serving as the base of the deceiving system.
+
+The main specification defines that all VMs are identical and configured for remote operations, have functional inter-VM communication and meet all requirements (e.g. kernel version, basic security settings, hardening). Creating multiple identical VMs can be achieved by preceding mechanisms (e.g. \textit{cloud-init}\footnote{https://github.com/canonical/cloud-init}), sharing the same image or by provisioning mechanisms (e.g. \textit{Vagrant}, \textit{Ansible}).
+
+It depends on the implementation, but since these VMs have a static and simple setup, preceding is not necessary. This technique is fully configurable and must be automated or manually ran for each VM with deviating variables e.g. host name, IP address. This is not a complicated process, but a more suitable approach is using a shared pre-configured image combined with a dedicated tool - Vagrant for seamless provisioning and installation. KVM with libvirt and Vagrant create a "VM as code" concept efficient in provisioning, preceding and whole VM management.
+
+% TODO: move to implementation part
+% This is where Vagrant comes in place to effectively manage the creation of custom VMs. In addition to Vagrant there is also inter-VM networking and choice of virtualization provider.
+
+\subsubsection*{Setup \label{design:env-arch:base:setup}}
+Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mention in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster. Both of these networks are represented as Linux network bridges.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.4]{base_system_design}
+	\caption{Base system visualization. !!!!REVIEW ME!!!!}
+	\label{image:design:base_system}
+\end{figure}
+
+Given that, the deceiving environment is isolated twice (Kubernetes-managed containers and VMs), the host machine is not expected to experience any malicious activity. Even though, a set of precautions is advised in case of any suspicious activity occurs otherwise. But only passive techniques are suitable, because all of activity from the isolated environment is routed through the host system, which must be allowed. Network security monitoring (NSM) solution designed for detection rather than prevention should effectively provide the sufficient visibility over the host system. Although, this is not the main thesis objective, so there are no specific requirements and it depends on the implementation.
+
+\subsubsection*{Vagrant \label{design:env-arch:base:vagrant}}
+Sharing a custom base image (Vagrant box), saves time on configuration and is less prone to error. Utilizing a pre-configured Vagrant box does not necessarily mean the configuration is immutable, all can be changed via Vagrant post-deploy commands and provisioning in the \textit{Vagrantfile}. Security-wise, creating a custom Vagrant box from the official Ubuntu image is recommended over publicly available Vagrant boxes from unverified owners. Not knowing the whole agenda of those boxes a full audit would be appropriate to approve their usage. Therefore, the all VMs have been created with a specific Vagrant box.
+
+Each Vagrant box is a minimal Ubuntu (of satisfying version defined in \autoref{design:specs}) installation with the following configuration and setup:
+\begin{itemize}
+	\item 
+	user setup including password protected \textit{root}
+	\item 
+	kernel parameters
+	\begin{itemize}[label=$\hyphen$]
+		\item
+		enabled IP forwarding - \texttt{net.ipv4.ip\_forward}
+	\end{itemize}
+	\item 
+	VM routing table entry to satisfy reverse path check - new route through the NODE network to the administration network or machine
+	\item
+	SSH daemon configuration
+	\item 
+	custom dependencies based on the implementation
+\end{itemize}
+
+Additionally everything else is done within the Vagrantfile, which is configurable with environment variables or other type of arguments. The input variables are the NODE network bridge name, IP prefix for the NODE network, number of nodes and vagrant box identifier. Altogether, the Vagrantfile creates all requested nodes as functional and remotely accessible VMs ready for Kubernetes installation and the deception environment configuration.
+
+\subsection{Kubernetes cluster \label{design:env-arch:k8s}}
+Kubernetes is a complex and highly configurable, therefore a simple configuration is sufficient. There are many Kubernetes installation techniques and various derivatives meant for minimal setup and development. For this thesis a full Kubernetes ecosystem is preferred to mimic a production environment as much as possible.
+
+\subsubsection*{Setup \label{design:env-arch:k8s:setup}}
+mention:
+- loadbalancer necessity - metallb as the only functional baremetal loadbalancer
+- data node requirement for persistent data storage
+  - NFS
+
+\subsubsection*{Environments \label{design:env-arch:k8s:envs}}
+mention:
+- possible environment scenarios
+- desired structure (maybe belongs to implementation)
+	- using deployments over sole pods
+	- storage class over persistent volumes
+- most of what is in the k8s-environments repo but from a design point of view
 
 \section{Container monitoring \label{design:con-mon}}
 Monitoring a container means to effectively observe container file system, networking and process execution. Inspired by some related solutions, this section describes the monitoring mechanisms utilized in this thesis.
@@ -15,3 +84,15 @@ Monitoring a container means to effectively observe container file system, netwo
 	\item 
 	The core monitoring tools and programs are deployed on the hosting nodes
 \end{itemize}
+
+\subsection{something}
+- sneakpeek scripts but from a design point of view
+
+\section{Deployment and emplacement \label{design:deployment}}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.4]{abstract_diagram}
+	\caption{Abstract idea of this thesis system emplacement.}
+	\label{image:design:abstract}
+\end{figure}

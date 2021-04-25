@@ -37,7 +37,11 @@ The client-side honeypot is deployed as a user application, which utilizes the s
 
 \section{Virtualization technology \label{anal:virtual}}
 
-\subsection{Kernel Virtual Machine \label{anal:virtual:kvm}}
+\subsection{Kernel-based Virtual Machine \label{anal:virtual:kvm}}
+
+% TODO: why KVM and libvirt. KVM is a type-1 (bare-metal) hypervisor technology which enables VMs to exist in the host system. libvirt is the API daemon for VM configuration and specification
+
+% TODO: mention vagrant and mainly vagrant boxes and configuration possibilities i.e. vagrant-libvirt, networking, ruby language for configration freedom because it's not bound to configration variables but the full language syntax is available for creating numerous varying VMs
 
 \subsection{Kubernetes \label{anal:virtual:k8s}}
 
