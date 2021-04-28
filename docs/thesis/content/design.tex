@@ -7,7 +7,40 @@ This short section summarizes all specifications and assumptions considering the
 Regarding the VMs, there are no kernel specification, but they have Ubuntu 18.04.5+ or 20.04.x. Additionally, each VM has the minimum memory size of 4 GB and 2 virtual processors (vCPU). Although, this can vary depending of the host system resources.
 
 \section{Environment architecture \label{design:env-arch}}
-The environment has a solid underlying architecture considering a proper isolation layer and other prevention mechanisms to secure the hosting system. The main goal is a mimicking production environment build atop of Kubernetes cluster. Sequentially, this section covers all in a bottom-up fashion to Kubernetes cluster design.
+The environment has a solid underlying architecture considering a proper isolation layer and other prevention mechanisms to secure the hosting system. These operations and precautions are in compliance with the ISO 27002 standard. The bait environments within, are deliberately vulnerable in some way, therefore they are not designed to abide much of any of the ISO 27000 standards. The main goal is a mimicking production environment build atop of Kubernetes cluster. Sequentially, this section covers all in a bottom-up fashion through Kubernetes cluster design to system environments.
+
+The considered specific control categories of the "Information technology -- Security techniques -- Code of practice for information security controls" - ISO 27002 are\footnote{All of the outlined categories are derived from the official standard \cite{iso:27002} with proper numbering preserved}:
+\begin{enumerate}[label=\arabic*.,ref={ISO-27002 category \theenumi},start=12]
+	\item Operations security \label{iso.12}
+	\begin{enumerate}[label=\arabic*.,ref=\theenumi.\arabic*]
+		\item Operational procedures and responsibilities \label{iso.12.1}
+		\item Protection from malware \label{iso.12.2}
+		\item Backup \label{iso.12.3}
+		\item Logging and monitoring \label{iso.12.4}
+		\item Control of operational software \label{iso.12.5}
+	\end{enumerate}
+	\item Communications security \label{iso.13}
+	\begin{enumerate}[label=\arabic*.,ref=\theenumi.\arabic*]
+		\item Network security management \label{iso.13.1}
+	\end{enumerate}
+	\item System acquisition, development and maintenance \label{iso.14}
+	\begin{enumerate}[label=\arabic*.,ref=\theenumi.\arabic*,start=2]
+		\item Security in development and support processes \label{iso.14.2}
+	\end{enumerate}
+\end{enumerate}
+
+%12       
+%- 12.1   X
+%- 12.2  - slightly compliant on the host system, but not much can be done on a bait system
+%- 12.3   X
+%- 12.4  - all soft developed keeps a log file with metrics/data but also execution logs - monitoring with prometheus of basic linux metrics
+%- 12.5  - mention semantic verionsing in monitoring (software used) + ansible like everything is pamametrized to be able to rollback
+%13       X
+%- 13.1   X
+%14       X
+%- 14.2   x
+
+Before implementation, the whole solution including program code, configurations and operation process must be documented with proper backups in terms of these control categories. According to \ref{iso.12.1} part "12.1.1 Documented operating procedures", the solution must have a technical documentation of the operations, which means including installation, setup and configuration procedures whether they are automated or not. This category links to \ref{iso.14.2}, which discusses the security of version control systems and remote repositories used for sharing and archiving. All developed programs have a dedicated repository with no sensitive configurations, which could compromise the system. Last but not least, \ref{iso.12.3} refers to creating and maintaining proper backup procedures of valuable assets. Partly it correlates with the previous categories and only together function as secure, documented, archived and reproducible in case of any failure.
 
 \subsection{Base system \label{design:env-arch:base}}
 The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriving from a Kubernetes cluster design in production environment, which often isn't a single-node architecture, the base system must be a set of coexisting VMs. Choosing the right number of VMs with respect to the overall resource capacity is not in scope of this thesis. Nevertheless, there are three base VMs serving as the base of the deceiving system.
@@ -20,7 +53,7 @@ It depends on the implementation, but since these VMs have a static and simple s
 % This is where Vagrant comes in place to effectively manage the creation of custom VMs. In addition to Vagrant there is also inter-VM networking and choice of virtualization provider.
 
 \subsubsection*{Setup \label{design:env-arch:base:setup}}
-Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mention in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster. Both of these networks are represented as Linux network bridges.
+Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mention in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster. Both of these networks are represented as Linux network bridges and are segregated to comply with \ref{iso.13.1}.
 
 \begin{figure}[h]
 	\centering
@@ -80,6 +113,13 @@ Only after the cluster is fully functional, the before mentioned load balancing 
 %	- using deployments over sole pods
 %	- storage class over persistent volumes
 %- most of what is in the k8s-environments repo but from a design point of view
+%Practically ... about the environments from architecture POV
+%Technically .. about git repos and proper management for redeploying
+Each environment covers a whole system with multiple applications and subsystems. In terms of Kubernetes, the environment is a collection of compatible objects/resources. Some with simple functions and dedicated applications (e.g. FTP server, private Docker registry, Gitea/GitLab, mail server or Nextcloud) others with connected active processes or dependent applications (e.g. data pipelines or microservice ecosystem). 
+
+Technically, an environment in terms of this thesis is a collection of YAML files stored in a remote repository easily deployed to the cluster. More specifically, Kubernetes \textit{pods}, \textit{services}, configuration (via e.g. \textit{configmaps}, \textit{secrets}), mounted volumes and/or permission-related objects. Practically, pods are replaced with \textit{deployments} and published services are using service type \textit{LoadBalancer} (utilizes MetalLB).
+
+%TODO: maybe include a design of several environments only from the application POV e.g. scenario1 - FTP + mail + blog + gitlab, scenario2 - microservice application with multiple pods ...
 
 \section{Container monitoring \label{design:con-mon}}
 Monitoring a container means to effectively observe container file system, networking and process execution. Inspired by some related solutions, this section describes the monitoring mechanisms utilized in this thesis.
