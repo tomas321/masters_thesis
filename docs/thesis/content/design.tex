@@ -2,13 +2,15 @@
 This chapter focuses on the overall design of the solution, depicting the crucial parts. Firstly, the base system of the monitored environment. Secondly, container remotely controlled event-based monitoring of processes, file system changes and networking. Thirdly, deployment and emplacement of the isolated environment and additionally connecting it over network in a target facility or system.
 
 \section{Specification \label{design:specs}}
-This short section summarizes all specifications and assumptions considering the design. The target operating system is always Linux distribution Ubuntu 18.04.5+ with hardware enablement (HWE) or 20.04.x. The kernel specification is important for the machine hosting VMs. In addition, the KVM (with QEMU) is used with the libvirt management library, which fully satisfies the choice of virtualization technology.
+This short section summarizes all specifications and assumptions considering the design. The target operating system is always Linux distribution Ubuntu 18.04.5+ with hardware enablement (HWE) or 20.04.x. The kernel specification is important for the machine hosting VMs to satisfy eBPF tools. In addition, the KVM (with QEMU) is used with the libvirt management library, which fully satisfies the choice of virtualization technology.
+
+Regarding the VMs, there are no kernel specification, but they have Ubuntu 18.04.5+ or 20.04.x. Additionally, each VM has the minimum memory size of 4 GB and 2 virtual processors (vCPU). Although, this can vary depending of the host system resources.
 
 \section{Environment architecture \label{design:env-arch}}
 The environment has a solid underlying architecture considering a proper isolation layer and other prevention mechanisms to secure the hosting system. The main goal is a mimicking production environment build atop of Kubernetes cluster. Sequentially, this section covers all in a bottom-up fashion to Kubernetes cluster design.
 
 \subsection{Base system \label{design:env-arch:base}}
-The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriving from a Kubernetes cluster design in production environment, which often isn't a single-node architecture, the base system must be a set of coexisting VMs. Choosing the right number of VMs with respect to the overall resource capacity is not in scope of this thesis. Nevertheless, there will three base VMs serving as the base of the deceiving system.
+The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriving from a Kubernetes cluster design in production environment, which often isn't a single-node architecture, the base system must be a set of coexisting VMs. Choosing the right number of VMs with respect to the overall resource capacity is not in scope of this thesis. Nevertheless, there are three base VMs serving as the base of the deceiving system.
 
 The main specification defines that all VMs are identical and configured for remote operations, have functional inter-VM communication and meet all requirements (e.g. kernel version, basic security settings, hardening). Creating multiple identical VMs can be achieved by preceding mechanisms (e.g. \textit{cloud-init}\footnote{https://github.com/canonical/cloud-init}), sharing the same image or by provisioning mechanisms (e.g. \textit{Vagrant}, \textit{Ansible}).
 
@@ -53,21 +55,31 @@ Each Vagrant box is a minimal Ubuntu (of satisfying version defined in \autoref{
 Additionally everything else is done within the Vagrantfile, which is configurable with environment variables or other type of arguments. The input variables are the NODE network bridge name, IP prefix for the NODE network, number of nodes and vagrant box identifier. Altogether, the Vagrantfile creates all requested nodes as functional and remotely accessible VMs ready for Kubernetes installation and the deception environment configuration.
 
 \subsection{Kubernetes cluster \label{design:env-arch:k8s}}
-Kubernetes is a complex and highly configurable, therefore a simple configuration is sufficient. There are many Kubernetes installation techniques and various derivatives meant for minimal setup and development. For this thesis a full Kubernetes ecosystem is preferred to mimic a production environment as much as possible.
+Kubernetes is complex and highly configurable, therefore a simple configuration is sufficient. There are many Kubernetes installation techniques and various derivatives meant for minimal setup and development (e.g. \textit{microk8s}\footnote{\url{https://microk8s.io/}}, \textit{minikube}\footnote{\url{https://minikube.sigs.k8s.io/docs/}}, \textit{k3s}\footnote{\url{https://k3s.io/}}). For this thesis a full Kubernetes ecosystem is preferred to mimic a production environment as much as possible.
 
 \subsubsection*{Setup \label{design:env-arch:k8s:setup}}
-mention:
-- loadbalancer necessity - metallb as the only functional baremetal loadbalancer
-- data node requirement for persistent data storage
-  - NFS
+Considering Kubernetes as a cloud-only platform, there are few differences to take into account when deploying microservices and applications on a bare-metal variant. Most importantly, Kubernetes is installed on those three base VMs in an arrangement of one master node with two worker nodes. Which briefly means, that the master node controls the cluster and does not provide any computational resources like the worker nodes do.
+
+Things like storage and load balancing network traffic, are cloud provider services, which need to be substituted. Regarding persistent storage for demanding applications, the cluster is scaled up with additional dedicated node (data node) for storage. Data node is not part of the Kubernetes cluster, it serves as an external Network File System (NFS) server providing persistent storage. This node is setup in the same way as the other cluster nodes, except for the Kubernetes installation. Instead, setup with simple NFS server.
+
+The Kubernetes ecosystem is installed via \textit{kubespray}\footnote{\url{https://kubespray.io/}}, which is a full Ansible skeleton for a complete cluster setup. Kubespray installs all dependencies, configures networking and assigns roles (master vs. worker) to all nodes. The cluster is ready for creating new objects, applications and environments.
+
+Only after the cluster is fully functional, the before mentioned load balancing can be setup. For a bare-metal installation, the \textit{MetalLB}\footnote{\url{https://metallb.org/}} load balancer effective and provides full Kubernetes loadbalancer capabilities. MetalLB is setup in layer 2 mode, which refers to the data link layer of the RM OSI model. This mode utilizes the address discovery protocol (i.e. ARP) to route between nodes and turns one node into a point of enter. It is not a true load balancing technique, but it serves the key purpose of publishing common ports to the outside network.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.5]{k8s_design}
+	\caption{Desired system setup with an environment ready Kubernetes.}
+	\label{image:design:k8s}
+\end{figure}
 
 \subsubsection*{Environments \label{design:env-arch:k8s:envs}}
-mention:
-- possible environment scenarios
-- desired structure (maybe belongs to implementation)
-	- using deployments over sole pods
-	- storage class over persistent volumes
-- most of what is in the k8s-environments repo but from a design point of view
+%mention:
+%- possible environment scenarios
+%- desired structure (maybe belongs to implementation)
+%	- using deployments over sole pods
+%	- storage class over persistent volumes
+%- most of what is in the k8s-environments repo but from a design point of view
 
 \section{Container monitoring \label{design:con-mon}}
 Monitoring a container means to effectively observe container file system, networking and process execution. Inspired by some related solutions, this section describes the monitoring mechanisms utilized in this thesis.
