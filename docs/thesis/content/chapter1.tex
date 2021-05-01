@@ -45,6 +45,12 @@ The client-side honeypot is deployed as a user application, which utilizes the s
 
 \subsection{Kubernetes \label{anal:virtual:k8s}}
 
+\subsection{Docker \label{anal:virtual:docker}}
+% TODO: switch order with Kubernetes to maintain postupnost virtualizacie
+% only short mainly about that video which covers it all
+% container spying through mergeddir and other things
+% searching for processes running in container etc.
+
 \section{Environment monitoring \label{anal:mon}}
 Knowing what and how to extract and monitor is vital to understanding the threat actor and the agenda. There are various mechanisms and possibilities to effectively observe container file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
 
@@ -53,6 +59,8 @@ Knowing what and how to extract and monitor is vital to understanding the threat
 	from the container in form of an agent reporting events
 	\item 
 	from the node as agent-less programs "spying" on the containers
+	\item 
+	bpftool, bcc tools
 \end{itemize}
 
 Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is the transparency for the threat actor, since the container is observed from the hosting operating system. For example docker with the \textit{overlayfs} driver has a predefined directory for each container with the root FS.

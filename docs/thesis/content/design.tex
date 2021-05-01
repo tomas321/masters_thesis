@@ -122,7 +122,7 @@ Technically, an environment in terms of this thesis is a collection of YAML file
 %TODO: maybe include a design of several environments only from the application POV e.g. scenario1 - FTP + mail + blog + gitlab, scenario2 - microservice application with multiple pods ...
 
 \section{Container monitoring \label{design:con-mon}}
-Monitoring a container means to effectively observe container file system, networking and process execution. Inspired by some related solutions, this section describes the monitoring mechanisms utilized in this thesis.
+Monitoring a container requires to observe container file system, networking and process execution in the most efficient way. Inspired by some related solutions, this section describes the monitoring mechanisms, tools and techniques utilized in this thesis.
 
 \begin{itemize}
 	\item 
@@ -137,10 +137,68 @@ Monitoring a container means to effectively observe container file system, netwo
 	The core monitoring tools and programs are deployed on the hosting nodes
 \end{itemize}
 
-\subsection{something}
-- sneakpeek scripts but from a design point of view
+\subsection{Activity events \label{design:mon:events}}
+The traced events, which are used to identify the malicious actor's agenda are file system, network and process related. Each type of event has a different repetition period and importance. For example, network and process events are also self-occurring (with no user initialization activity), therefore not all are held as valuable as file system changes. Files are changed less frequently and selectively choosing valuable directories, the monitoring agents gain visibility over the desired parts of the file system. Nevertheless, the down side to all types of these events are those interpreted as false positive.
+
+According to \ref{iso.12.4} part "12.4.4 Clock synchronisation" "the clocks of all relevant information processing systems within an organization or security domain should be synchronised to a single reference time source" \cite{iso:27002}. All events are tagged with a timestamp to correctly create a timeline of all events together. Since the designed system is wrapped by VMs, which share the host machine, the time is identical each VM.
+
+\subsubsection*{File system events \label{design:mon:events:fs}}
+Any modifications or removal of existing and creation of new files in the specified locations of the file system are detected and logged. Additional events possible to monitor, are file permissions, owners, access lists and renaming. Since, "Everything is a file" mostly applies, there are expected to be many uninteresting events.
+
+\subsubsection*{Process execution events \label{design:mon:events:proc}}
+It depends on the implementation, but process events are any new instances that are readable in the output of "\texttt{ps waxu}" command. Including process and parent process IDs (PID, PPID resp.), user, command line including arguments and optionally memory and CPU usage creates an image of observed activities.
+
+\subsubsection*{Network events \label{design:mon:events:net}}
+Malicious actors use network to exfiltrate data, send commands or connect to the target service/system. Malicious programs propagate and mutate through network. For all these scenarios a different protocol or technique may be used. Although, in Kubernetes pod/container network services must be published over Kubernetes service objects, therefore setting up a backdoor listing on arbitrary port requires access to \textit{kubectl} or a vulnerability in Kubernetes itself. Meaning only existing services are of interest in addition to general exfiltration network protocols e.g. FTP, SMTP, HTTP/S, DNS, SMB according to the MITRE technique - "Exfiltration Over Alternative Protocol" \cite{mitre:T1048}.
+
+\subsection{Tools and techniques \label{design:mon:tools}}
+%- sneakpeek scripts but from a design point of view
+% docker inspect output 
+% bpftool, mount namespace for container segregation
+% ansible or script for retrieving current setup
+% templated systemd units for per-container monitoring
+Whether it is monitoring from the host machine or directly from Kubernetes, a list of target containers is vital. In case of monitoring from within the containers, an agent/daemon is predefined as part of the pod in its object definition. On the other hand, for a host-based monitoring some kind of reconnaissance must occur to identify all targets in an automated way. The designed tools are described in depth in the following sections.
+
+\subsubsection*{Host-based monitoring \label{design:mon:tools:host}}
+% simple API for process monitoring of processes and systemd units
+All events are detectable, to some extend, from the host. Since all activity originates from a Docker container, by design the file system, processes and network traffic is accessible.
+
+Firstly, dynamically getting all the active containers is crucial for inspecting any of the discussed events. Using the control tool \textit{kubectl} get the cluster nodes, which host the pods. Combining \textit{kubectl} and \textit{docker-inspect}, it is simple to retrieve all containers and additional metadata. Altogether the designed tool maps all application containers to nodes for further processing.
+
+Docker container metadata provide all the necessary information to locate the container root directory and mounted file systems. Using a standardized technique, these directories or selective subdirectories may be actively monitored for changes. More specifically, '\texttt{.[0].GraphDriver.Data.MergedDir}'\footnote{\label{footnote:jq}jq filter} gives the top level file system of the \textit{overlayfs} and '\texttt{.[0].Mounts[].Source}'$^{\ref{footnote:jq}}$ returns the mounted directories located on the host. This tool extension executes file system monitoring for each container utilizing tools like \textit{fswatch}, \textit{inotify} or \textit{opensnoop}.
+
+Detecting executed processes is a more sofisticated issue, but using the right technique is important. eBPF enables the tool \textit{execsnoop} to tap into the kernel and record system calls. Fortunately, execsnoop allows various filtering options. Specifically the mount namespace efficiently isolates the observable system calls within a single container. For execsnoop the mount namespace identifier is shared over the BPF map objects using \textit{bpftool}, which are available for a latest kernel version requirement mentioned in \autoref{design:specs}.
+
+Last of the event types - network traffic monitoring is much more intuitive and native to the architecture and technology used. Since the applications within the cluster are virtualized, the pod network interfaces can be traced to host accessible interfaces. Consequently, a tool taps on to the interface and effectively scans the whole traffic including a pod-to-pod and pod-to-external communications. This leaves open possibilities to tools like \textit{DPDK} or netflow collectors like \textit{suricata}, Although the design expects many pods with many interfaces, so the network traffic collector should have a minimal overhead. % TODO: add the packet capture tool used
+
+\subsubsection*{Control tool \label{design:mon:tools:main}}
+The main control (\textit{API server}) tool is for managing and controlling all of the above mentioned tools and functionality. It is a centralized API server, which has access to the execsnoop, fswatch and nettool (\textbf{TODO change}) for basic management. Additionally, API server provides additional threat hunting functionality such as:
+\begin{itemize}
+	\item running process information
+	\item file information \textbf{MUST IMPLEMENT}
+	\item \textbf{TODO other}
+	% todo: !!!
+\end{itemize}
+
+\subsubsection*{Kubernetes monitoring \label{design:mon:tools:k8s}}
+% service mesh - istio (SHOULD also be in analysis)
+% prometheus
+The minimal monitoring of the whole cluster is an ideal job for the \textit{Prometheus} toolkit combined with \textit{Grafana} dashboards for visualization. Prometheus provides visibility of the golden metrics\footnote{"Golden metrics (or “golden signals”) are the top-line metrics that you need to have an idea of whether your application is up and running as expected."\cite{goldenmetrics}}.
+
+Apart from the network and pod monitoring, other events are not being tracked from within the cluster.
 
 \section{Deployment and emplacement \label{design:deployment}}
+This section focuses on the design of deployment methods and ideal emplacement of the system. The focus is mainly on \textit{Ansible}, \textit{Vagrant}, \textit{kubespray} and \textit{kubectl}. The main goal is an Ansible skeleton with playbooks and roles and applicable division by hosts in custom inventory(s).
+
+\subsection{Deployment \label{design:deployment:deploy}}
+The prerequisite are cluster nodes, which are deployed and pre-configured using Vagrant as discussed in \autoref{design:env-arch:base:vagrant}. While the Vagrantfile defines cluster nodes, Ansible executes scripts, additional configuration and provisioning of Kubernetes and installation of tools' dependencies.
+
+Following the Ansible design patterns, any compact deployment is packed in an Ansible playbook or Ansible role. \autoref{design:env-arch:k8s:setup} already addresses kubespray as the Kubernetes deployment mechanism, which is not integrated to the main Ansible skeleton.
+
+Apart from the Kubernetes deployment all required setups (both Kubernetes-related and not) and tools are provisioned by playbooks or roles. Each is fully configurable by Ansible group and host variables, which define a specific environment setup and can be cloned to configure an environment with different properties.
+
+\subsection{Emplacement \label{design:deployment:place}}
+An abstract visualization in \autoref{image:design:abstract} shows the bait system behind a firewall next to a organization's production environment. This one of possible emplacements of the system in a network. 
 
 \begin{figure}[h]
 	\centering
@@ -148,3 +206,4 @@ Monitoring a container means to effectively observe container file system, netwo
 	\caption{Abstract idea of this thesis system emplacement.}
 	\label{image:design:abstract}
 \end{figure}
+

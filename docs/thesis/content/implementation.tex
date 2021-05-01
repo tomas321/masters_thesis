@@ -15,3 +15,9 @@
 	All is automated with Ansible.	
 	
 \end{itemize}
+
+- network traffic is monitored by tapping to the mapped interface on the host system
+1. get the docker container pid
+2. us nsenter to execute 'ip addr' to get the main net interface
+3. from that get the mapped interface 
+4. tap on that interface with tcpdump or some other software

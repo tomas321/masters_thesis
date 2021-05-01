@@ -167,3 +167,9 @@ In a SSH scenario the created a new syscall and modified the SSH server to use i
 A case study \cite{study:siphon} on Scalable High-Interaction Physical Honeypots (SIPHON), similar to the study before, serving as a proof of concept in live Internet traffic observing the IOT related malicious intents. Leveraging Shodan to appear visible and legitimate in the eyes of malicious actors, the honeypots where based on real devices. The architecture is divided into physical IOT devices, wormholes exposed to the Internet forwarding to the IOT devices via the proxy forwarder. Technically are devices separated using VLANs 802.1Q and the wormhole to forwarder connection are via reverse ssh tunnels. As compromise countermeasures the suricata IPS and IDS features are enabled in the local netowork and periodic resets of IOT devices.
 
 They observed the influence of device listing in Shodan. The number of scans/connection attempts on the device has tripled between `one week before listing' and `one week after listing'. It proves that being visible by Shodan increases the possibility of attack reconnaissance on device at hand. Although, after two week after listing in Shodan, the connection attempts has decreased, which good piece of knowledge before implementation.
+
+\section{Kuberentes specific solutions \label{related:k8s}}
+
+\subsection{alcide \label{related:k8s:alcide}}
+% TODO: 
+% https://www.alcide.io/platform/#tab-2
