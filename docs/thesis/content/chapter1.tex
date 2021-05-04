@@ -8,7 +8,7 @@ Monitoring a malicious actor, sample or an entity in any environment is intercha
 Dynamic analysis is a process of actively monitoring, ideally in an isolated environment, the execution of a malware sample. Static analysis, as the name implies, inspects the function calls, readable strings, control and data flow of a malware sample (i.e. binary, program code).
 
 % DYNAMIC ANALYSIS LIMITATIONS:
-Dynamic analysis may be unsafe and devastating, unless environment or system isolation is applied, but it's more precise and bypasses the reversing of self-modified code. Even though, dynamic analysis does not explore all execution paths, there are techniques resolving this drawback (i.e. virtual machine snapshots \cite{research:malware_analysis_2017}). Furthermore, dynamic analysis in a isolated or virtualization environment is exposed to the risk of [isolation] detection \cite{medium_article:malware_analysis_sandboxing}.
+Dynamic analysis may be unsafe and devastating, unless environment or system isolation is applied, but it's more precise and bypasses the reversing of self-modified code. Even though, dynamic analysis does not explore all execution paths, there are techniques resolving this drawback (i.e. virtual machine snapshots \cite{research:malware_analysis_2017}). Additionally, dynamic analysis in an isolated or virtualization environment is exposed to the risk of isolation detection \cite{medium_article:malware_analysis_sandboxing}, meaning the executed malicious program stops or even self-destructs.
 
 %STATIC ANALYSIS LIMITATIONS:
 Static analysis is safe [and inspects all execution paths of the binary], but may be difficult to interpret when malicious actors utilize the obfuscation, compression or encryption techniques. Advanced malware sample poses a challenge for a malware analyst due the usage of control-flow flattening \cite{report:eset_static_analysis} and other methods. It suggests that dynamic malware analysis bypasses this troublesome procedure and discloses the sample outcome or agenda.
@@ -16,10 +16,10 @@ Static analysis is safe [and inspects all execution paths of the binary], but ma
 Manual Egele, et al. in their article \cite{article:malware_analysis_techniques} highlight the problems of static malware analysis approaches. The authors introduce multiple state-of-the-art techniques and tools dedicated to dynamic malware analysis - Function Call Monitoring, Function Parameter Analysis focusing of the final values, Information Flow Tracking, Instruction Trace and Auto start Extensibility Points (monitor startup programs, cron jobs, etc.).
 % TODO: consider more detailed explanation of the techniques
 
-\subsection{Mechanisms [and environments and tools] \label{anal:malware:mech_envs}}
+\subsection{Bait and execution environments \label{anal:malware:mech_envs}}
 These mechanisms must provide solution to dynamic malware analysis limitations in order to effectively capture the malicious actor's agenda. It should be a robust system implying the impression of a production environment.
 
-\subsubsection{Honeypot and honeynet \label{anal:malware:mech_envs:hons}}
+\subsubsection*{Honeypot and honeynet \label{anal:malware:mech_envs:hons}}
 Honeypot is a bait service, system or a even whole network (honeynet) usually hosted on public server. Its main purpose is to be scanned, attacked or compromised by the malicious actor. Every honeypot provides the desired functionality of the target resource, to mimic the production environment, leaving the malicious actor unaware of the honeypot \cite{study:enisa_honeypots}.
 
 Based on the ENISA honeypot study \cite{study:enisa_honeypots}, honeypots are classified from the level of interaction view and based on the attacked resource type. The Low Interaction Honeypot (LIH) provides very low availability of the host OS. Most services and application are mocked and simulated in a static environment. Everything accessible is controlled by a decoy application with absolutely minimal in-depth features (e.g. shell, configuration files, other programs etc.). LIHs are more secure for the host, but far less capable or useful for malware/attack detection and inspection.
@@ -32,24 +32,70 @@ The client-side honeypot is deployed as a user application, which utilizes the s
 
 % TODO: maybe briefly define honeypot classifications in the footnotes and define honeypots technically in-depth
 
+\subsubsection*{Sandbox \label{anal:malware:mech_envs:sand}}
+In the security branch, sandbox is used for controlled both static and dynamic malware analysis as mentioned in \autoref{anal:malware:dyn_stat}. It is dedicated for execution or testing of unverified functionality, behavior of programs or other activity \cite{article:fortinet:sandbox}. Moreover, the environments hosting or serving as a sandbox must be isolated to secure any spreading. A possible attack of this kind is referred to as the escape attack, which is a vulnerability allowing a malicious actor to move from virtualized/containerized environment to the host system.
 
-\subsubsection{Sandbox \label{anal:malware:mech_envs:sand}}
+"When a threat is contained within the sandbox environment, it is quarantined and available for study by the in-house IT team or external cybersecurity experts" \cite{article:fortinet:sandbox}. Slightly changing the notion makes a sandbox technology ideal for active and live analysis of malicious actors. Other benefits are flexibility of easily changing the environment to adapt to the current scenario.
 
 \section{Virtualization technology \label{anal:virtual}}
+The section discusses thesis related virtualization technologies kernel virtual machines (KVM), Docker containerization and the Kubernetes orchestration mechanism. Together these technologies may create a sandboxed honeynet holding theoretically multiple environments, thanks to the Kubernetes capabilities.
 
 \subsection{Kernel-based Virtual Machine \label{anal:virtual:kvm}}
-
 % TODO: why KVM and libvirt. KVM is a type-1 (bare-metal) hypervisor technology which enables VMs to exist in the host system. libvirt is the API daemon for VM configuration and specification
+KVM is a type-1 (bare-metal) hypervisor enabling technology used for virtualization of full operating systems. The core functionality is based on the kernel capabilities to manage the hardware resource, hence the name \textbf{Kernel-based} VM \cite{redhat:kvm}. KVM is native to the Linux as a kernel module, which requires the host machine processor virtualization support and by utilizing them, multiple VMs may coexist on one machine \cite{article:kvm_qemu}.
+
+\subsubsection*{KVM, QEMU and Libvirt \label{anal:virtual:kvm:combined}}
+
+Although, KVM is not a complete solution without the \textit{libvirt} virtualization API daemon and the \textit{QEMU} hardware emulation \cite{docs:qemu}. When referring to KVM, it is often substituted for both KVM and QEMU. The combination provides a performance considered nearly native-like \cite{article:kvm_qemu}. While the KVM kernel module translates code in the kernel-space, QEMU provides the virtualization and emulation of hardware resources. In addition, Libvirt is a virtualization management tool and API. It is fully configurable by automation mechanism to automate the whole process of VM creation.
+
+Libvirt is the solution to the variations of virtual machine images, since each technology has a different format. For example the storage backend provides the same API of so called volumes for any image format \cite{docs:libvirt:volume}. Apart from all of the libvirt objects available, networking is the most relevant. According to the API specification \cite{docs:libvirt:network}, the configuration options are for both VM network and host interface with DHCP, DNS and NAT. Additionally, there is also support for \textit{openvswitch}, which is particularly useful for more complex network architectures with VLANs and other protocols and standards.
+
+Nevertheless, libvirt and thereby KVM/QEMU is compatible with the Linux bridge \cite{docs:arch:bridge}, which is a simple virtual network component used for connecting networks. Creation and maintenance is straightforward and the functionality is effective enough to connect the VMs with the host machine. An advantage is it can be managed by various control tools (e.g. \textit{ip command}, \textit{ifupdown}, \textit{bridge-utils} and other), which provides the separation of the development environment setup and the main host environment.
+
+\subsubsection*{Vagrant \label{anal:virtual:kvm:vagrant}}
+According to official documentation\cite{docs:vagrant}, Vagrant is a VM provisioning technology and one level up in terms of KVM virtualization. Meaning, it adds another configuration layer for a whole multi-VM environment. It composes of manifest file called Vagrantfile. This file is a ruby program using specific calls to defined and configure multiple VMs. Vagrant is ideal for completely bypassing the direct usage of Libvirt and instead utilize the Vagrant libvirt provider\footnote{Open-source solution to the vagrant libvirt provider - \url{https://github.com/vagrant-libvirt/vagrant-libvirt}}. In a Kubernetes blog \cite{blog:k8s:vagrant}, the author describes multi-node Kubernetes cluster deployment using Vagrant with Ansible. It is practical approach to deploy a custom base environment with additional configuration using third-party tools e.g. Ansible.
 
 % TODO: mention vagrant and mainly vagrant boxes and configuration possibilities i.e. vagrant-libvirt, networking, ruby language for configration freedom because it's not bound to configration variables but the full language syntax is available for creating numerous varying VMs
 
-\subsection{Kubernetes \label{anal:virtual:k8s}}
+\lstinputlisting[language=Ruby, style=custom, caption={Working Vagrantfile example with the 'generic/ubuntu1804' using the libvirt provider and configuring 2GB or RAM, 2 virtual CPUs, DHCP network interface, libvirt storage pool to 'default'.}, label=listing:vagrantfileexample]{assets/listings/Vagrantfile.example}
+
+%Vagrantfile
+The fact that Vagrantfile is a ruby program provides the freedom of not being bound to a set of configuration variables and other related limitations. The definition is enclosed in \texttt{Vagrant.configure()} call and further divided in to \texttt{config.vm}, \texttt{config.ssh} and \texttt{config.vagrant} sections. \texttt{config.vm} is the context for configuring the VM directly with Vagrant e.g. vagrant box, provider, networking, disk. \texttt{config.ssh} is for configuring SSH access for the vagrant utility and \texttt{config.vagrant} is used for modifying Vagrant itself like plugins.
+
+The API is unified across all Vagrant providers and is enriched by provider-specific variables as the \texttt{libvirt\_\_network\_address} on line 19 in \autoref{listing:vagrantfileexample}. With the capabilities of \textit{vagrant-libvirt} provider, the VM can be defined is this one file - Vagrantfile.
+
+% vagrant boxes
+Another term is the Vagrant box. It is a specifically formatted unit packaging the VM image, which is ready for deployment. A box can found in public repositories e.g. Vagrant Cloud\footnote{\url{https://app.vagrantup.com/boxes/search}} similarly to the Docker Hub. Benefit is the customization and direct workflow when creating a box, because then it can be reused for other VMs are share the same configuration and setup.
 
 \subsection{Docker \label{anal:virtual:docker}}
 % TODO: switch order with Kubernetes to maintain postupnost virtualizacie
 % only short mainly about that video which covers it all
 % container spying through mergeddir and other things
 % searching for processes running in container etc.
+Docker is very popular containerization technology used by developers and in production environments. Therefore a detailed explanation is not in scope of this thesis. On other hand this section covers deeper aspects of Docker and its mostly containers.
+
+Similarly to Vagrant (see \autoref{anal:virtual:kvm:vagrant}), a Docker image is defined in a manifest file called Dockerfile. The image is used to create a Docker container as a single unit. Multiple containers can share an image with different configuration to adapt to the current environment e.g. database configuration, port publishing, storage mounting. 
+
+But, each container is uniquely identified by an ID and other resources and objects belonging to the single container e.g. mapped network interface, storage volumes. When not specifically configured, both networking and volumes/storage would be local to the container and be removed along with the container. In either case the data, networking and yet unmentioned processes are accessible from the host system. Main reference for the base information is the \texttt{docker inspect} command, which returns every settings, mounted directory, networking configuration and execution metadata.
+
+Julia Evans constructively discusses various container spying techniques dedicated to Docker in a video demonstration \cite{video:docker:spying}. Apart from Docker-specific spying with the \texttt{inspect} command, there is \texttt{nsenter} and the inspection of \texttt{overlayfs}. Nsenter is nearly equivalent to the \texttt{docker exec} command, but it executes a command with a specified namespace \cite{man:nsenter}. Despite knowing the container namespace, it has no requirements and is Linux native. The advantage over \texttt{docker exec} is that for nsenter the executed command/program (see \autoref{listing:nsenter:example}) does not needs to be installed in the target container.
+
+\lstinputlisting[language=bash, style=codestyle, caption={Executes the \texttt{ip address} command within the network (option \texttt{-n}) namespace of a taget process with ID 6234}, label=listing:nsenter:example]{assets/listings/nsenter_cmd.example}
+
+"OverlayFS is a modern union filesystem that is similar to AUFS, but faster and with a simpler implementation" \cite{docs:docker:overlayfs}. As the Docker image is build, each compact change creates a new layer of the container root file system linked to the previous layer and including the difference. These layers can be inspected in the host system as bare directories. Mounted volumes are no exception and both can be identified from the \texttt{docker inspect} command output. \textit{/var/lib/docker/overlay2} stores all these layers (see \autoref{listing:overlay2:example}). 
+
+\lstinputlisting[language=bash, style=custom, caption={Container files, independent of the layer, are accessible from the host system. For example output the contents of an arbitrary file}, label=listing:overlay2:example]{assets/listings/overlay2.example}
+
+Useful information in the \texttt{docker inspect} output:
+\begin{itemize}
+	\item Main process ID.
+	\item Path to the top layer of the overlay file system.
+	\item List of mounted volumes and directories.
+	\item Network interface.
+	\item Environment variables.
+\end{itemize}
+
+\section{Kubernetes \label{anal:k8s}}
 
 \section{Environment monitoring \label{anal:mon}}
 Knowing what and how to extract and monitor is vital to understanding the threat actor and the agenda. There are various mechanisms and possibilities to effectively observe container file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:

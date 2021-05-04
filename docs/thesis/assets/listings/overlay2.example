@@ -1,0 +1,14 @@
+root@node2:~# find -L /var/lib/docker/overlay2/l/ -name shadow
+/var/lib/docker/overlay2/l/7XOWKH6XWUWBNEQV7OJ2ZB5YRG/etc/shadow
+[.. OUTPUT TRIMMED ..]
+
+root@node2:~# cat /var/lib/docker/overlay2/l/7XOWKH6XWUWBNEQV7OJ2ZB5YRG/etc/shadow
+root:*:::::::
+daemon:*:::::::
+bin:*:::::::
+sys:*:::::::
+sync:*:::::::
+mail:*:::::::
+www-data:*:::::::
+operator:*:::::::
+nobody:*:::::::
