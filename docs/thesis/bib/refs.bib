@@ -2,7 +2,7 @@
 	author = {Lenny Zeltser},
 	title = {{5 Steps to Building a Malware Analysis Toolkit Using Free Tools}},
 	note= {SANS Institute instructor},
-	month = mar,
+	month = {3},
 	year = {2015},
 	url = {https://zeltser.com/build-malware-analysis-toolkit/#allocate-virtual-systems}
 }
@@ -11,7 +11,7 @@
 	author = {Grudziecki, Tomasz and Jacewicz, Paweł and Juszczyk, Łukasz and Kijewski, Piotr and Pawliński, Paweł},
 	title = {{Proactive Detection of Security Incidents - Honeypots}},
 	note= {enisa study},
-	month = nov,
+	month = {11},
 	year = {2012},
 	url = {https://www.enisa.europa.eu/publications/proactive-detection-of-security-incidents-II-honeypots}
 }
@@ -46,7 +46,7 @@
 	title = {Malware Analysis},
 	journaltitle = {ijarcsse},
 	year = {2017},
-	month = {dec},
+	month = {12},
 	url = {https://ijarcsse.com/index.php/ijarcsse/article/view/507},
 	urldate = {2020-03-26}
 }
@@ -130,10 +130,17 @@
 	urldate = {2020-12-04}
 }
 
+@unpublished{git:nfs,
+	title = {Kubernetes NFS Subdir External Provisioner},
+	date = {2021-02-04},
+	url = {https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/blob/master/README.md},
+	urldate = {2021-02-06}
+}
+
 @techreport{iso:27002,
 	author = {ISO/IEC 27002:2013},
 	type = {Standard},
-	month = {oct},
+	month = {10},
 	year = {2013},
 	title = {Information technology -- Security techniques -- Code of practice for information security controls},
 	edition = {2nd},
@@ -237,4 +244,70 @@
 	date = {2021-05-03},
 	url = {https://docs.docker.com/storage/storagedriver/overlayfs-driver/},
 	urldate = {2021-05-04}
+}
+
+@online{docs:k8s:concepts,
+	title = {Concepts},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/},
+	urldate = {2020-08-24}
+}
+
+@online{docs:k8s:concepts:pods,
+	title = {Pods},
+	subtitle = {Using Pods},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/workloads/pods/},
+	urldate = {2020-08-24}
+}
+
+@online{docs:k8s:concepts:replicasets,
+	title = {ReplicaSet},
+	subtitle = {When to use a ReplicaSet},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/},
+	urldate = {2021-05-06}
+}
+
+@online{docs:k8s:concepts:volumes,
+	title = {Volumes},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/storage/volumes/},
+	urldate = {2021-05-06}
+}
+
+@online{docs:k8s:concepts:persistentvolumes,
+	title = {Persistent Volumes},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/storage/persistent-volumes/},
+	urldate = {2021-05-06}
+}
+
+@online{docs:k8s:concepts:service,
+	title = {Service},
+	organization = {Kubernetes},
+	year = {2020},
+	url = {https://kubernetes.io/docs/concepts/services-networking/service/},
+	urldate = {2021-05-06}
+}
+
+@online{video:k8s:principals,
+	title = {Kubernetes Design Principles: Understand the Why - Saad Ali, Google},
+	author = {Saad Ali},
+	date = {2018-12-16s},
+	url = {https://www.youtube.com/watch?v=ZuIQurh_kDk},
+	urldate = {2020-05-20}
+}
+
+@online{docs:metallb,
+	title = {Concepts},
+	author = {Dave Anderson},
+	year = {2017},
+	url = {https://metallb.universe.tf/concepts/},
+	urldate = {2020-11-10}
 }

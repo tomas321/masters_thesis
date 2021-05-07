@@ -87,7 +87,7 @@ Julia Evans constructively discusses various container spying techniques dedicat
 \lstinputlisting[language=bash, style=custom, caption={Container files, independent of the layer, are accessible from the host system. For example output the contents of an arbitrary file}, label=listing:overlay2:example]{assets/listings/overlay2.example}
 
 Useful information in the \texttt{docker inspect} output:
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item Main process ID.
 	\item Path to the top layer of the overlay file system.
 	\item List of mounted volumes and directories.
@@ -96,6 +96,37 @@ Useful information in the \texttt{docker inspect} output:
 \end{itemize}
 
 \section{Kubernetes \label{anal:k8s}}
+This section covers the Kubernetes concepts focusing on the aspects essential for properly organizing an efficient setup. That includes Kubernetes nodes, Pods, Deployments, Services and persistent storage resources. \textit{Disclaimer: the following concept definitions are derived from the official Kubernetes documentation page} \cite{docs:k8s:concepts}.
+
+\subsection{Components and nodes \label{anal:k8s:nodes}}
+Kubernetes is a platform for orchestrating multiple containers among its cluster nodes. A functional cluster comprises of control-plane components i.e. API server, \textit{etcd}, Pod scheduler, controller manager and cloud-specific controller manager. The \textit{kubelet}\footnote{Communicates with the API server on the master node. Ensures that the Pods are up and running}, \textit{kube-proxy}\footnote{The node networking endpoint for Pod communications.} and container runtime components run on every node, wheres the control-plane components aside on a single node - control-plane node\footnote{Also referred to as the master node. The current Kubernetes documentation does not mention this node role anymore.}. All other nodes are called workers.
+
+When creating or updating a cluster, nodes are registered in the API server by kubelet or manually. A node must be considered healthy to run a Pod, which si important because the environment/cluster may be highly dependent on the node's computational resources. The declarative nature of Kubernetes simplifies the creation of development environments. The configuration defines a desired state of an application ecosystem, microservices or other custom environment and the control-plane schedules and assign the Pods to suitable nodes \cite{video:k8s:principals}. 
+
+\subsection{Resources \label{anal:k8s:resources}}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.6]{k8s_arch}
+	\caption{Kubernetes sample architecture with Pods, Deployments, Services and Volumes. A 'cloud' is a Kubernetes component (green = Pod, yellow = volume-related objects, red = Service and network-related objects). Lines represent communication links and the dotted lines are abstract/logical connections.}
+	\label{image:anal:k8s:arch}
+\end{figure}
+
+Kubernetes environments are build upon API resources or objects.
+
+\subsubsection*{Workloads \label{anal:k8s:resources:workloads}}
+Mainly the smallest running unit - Pod encapsulates one or more containers, storage resource and a unique network identifier. Best is to run single application instance per Pod \cite{docs:k8s:concepts:pods}. Above is a ReplicaSet\footnote{Definition of horizotally scaled Pods with a specific number of replicas.} and Deployment, which at first glance fulfills the same, except that Deployment (see the Deployment object in \autoref{image:anal:k8s:arch}) is a abstraction above Pods and ReplicaSets combined. Kubernetes suggests that "you may never need to manipulate ReplicaSet objects: use a Deployment instead" \cite{docs:k8s:concepts:replicasets}. Deployments allow rolling updates of both ReplicaSets and Pods. In comparison to \textit{docker-compose}, the definition of the container(s) in the Deployment resource is very syntactically similar.
+
+\subsubsection*{Volumes \label{anal:k8s:resources:volumes}}
+Kubernetes, dy default, does not provide data persistence, as it is in docker by design. There are various options of mounting volumes to Pods via PersistentVolumes (PV) e.g. cloud-specific volume plugins or \textit{hostPath}. The PV is linked to a special resource PersistentVolumeClaim (PVC), which is manually created alongside a Pod and binds to a suitable PV object \cite{docs:k8s:concepts:persistentvolumes}. In other words, PVC is a request for assigning a PV to Pod/Deployment. Although the PV must be created and meant all requirements of the PVC in case of successful binding. For that reason a PV template called StorageClass exists, which dynamically creates PVs for subsequent binding (refer to \autoref{image:anal:k8s:arch} for graphical representation of the relations).
+
+Since for this thesis the Kubernetes cluster is local and bare-metal (no cloud and in VMs) and hostPath expects the Pod(s) to remain on the same node\footnote{This can be resolved by using Taints and schedule the Pod only on the specified node. Although this beats the purpose of Kubernetes} \cite{docs:k8s:concepts:volumes}. The Network File System (NFS) is supported on any Linux system (as a NFS server) and has Kubernetes provisioner integration \cite{git:nfs}.
+
+\subsubsection*{Service \label{anal:k8s:resources:service}}
+By default every Pod running a network service is unable to communicate with the outside network or other applications within the cluster, except for the shared containers in the same Pod. The Service resource cooperates with the kube-proxy component, which assigns the Service a virtual IP address (also called ClusterIP) visible only inside the cluster \cite{docs:k8s:concepts:service}.
+
+The level of access via the Service depends on its type - ClusterIP, NodePort, LoadBalancer and ExternalName. To open a Service to the outside network (see the red section in \autoref{image:anal:k8s:arch}) any type but ClusterIP serves this purpose. The ExternalName requires a functional kube-dns component and NodePort does not map the service port to a reserved port, but instead uses a port from immutable range (30000-32767) \cite{docs:k8s:concepts:service}.
+
+A LoadBalancer is a cloud provider-specific Service type combining NodePort and Cluster in a way to expose the Service over a public IP address. An advantage is an existing bare-metal implementation\footnote{MetalLB - Metal Load Balancer is a bare-metal LB implementation utilizing either a RM-OSI layer 2 routing or BGP \cite{docs:metallb}.} and the ability to expose reserved ports (e.g. 22, 80, 443).
 
 \section{Environment monitoring \label{anal:mon}}
 Knowing what and how to extract and monitor is vital to understanding the threat actor and the agenda. There are various mechanisms and possibilities to effectively observe container file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:

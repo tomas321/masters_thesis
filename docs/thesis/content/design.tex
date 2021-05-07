@@ -68,12 +68,12 @@ Given that, the deceiving environment is isolated twice (Kubernetes-managed cont
 Sharing a custom base image (Vagrant box), saves time on configuration and is less prone to error. Utilizing a pre-configured Vagrant box does not necessarily mean the configuration is immutable, all can be changed via Vagrant post-deploy commands and provisioning in the \textit{Vagrantfile}. Security-wise, creating a custom Vagrant box from the official Ubuntu image is recommended over publicly available Vagrant boxes from unverified owners. Not knowing the whole agenda of those boxes a full audit would be appropriate to approve their usage. Therefore, the all VMs have been created with a specific Vagrant box.
 
 Each Vagrant box is a minimal Ubuntu (of satisfying version defined in \autoref{design:specs}) installation with the following configuration and setup:
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item 
 	user setup including password protected \textit{root}
 	\item 
 	kernel parameters
-	\begin{itemize}[label=$\hyphen$]
+	\begin{itemize}[noitemsep, label=$\hyphen$]
 		\item
 		enabled IP forwarding - \texttt{net.ipv4.ip\_forward}
 	\end{itemize}
@@ -124,7 +124,7 @@ Technically, an environment in terms of this thesis is a collection of YAML file
 \section{Container monitoring \label{design:con-mon}}
 Monitoring a container requires to observe container file system, networking and process execution in the most efficient way. Inspired by some related solutions, this section describes the monitoring mechanisms, tools and techniques utilized in this thesis.
 
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item 
 	Points of enter, such as honeypots that lure the threat actors to the environment. Could be local to the environment or remote anywhere in the Internet.
 	\item 
@@ -173,7 +173,7 @@ Last of the event types - network traffic monitoring is much more intuitive and 
 
 \subsubsection*{Control tool \label{design:mon:tools:main}}
 The main control (\textit{API server}) tool is for managing and controlling all of the above mentioned tools and functionality. It is a centralized API server, which has access to the execsnoop, fswatch and nettool (\textbf{TODO change}) for basic management. Additionally, API server provides additional threat hunting functionality such as:
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item running process information
 	\item file information \textbf{MUST IMPLEMENT}
 	\item \textbf{TODO other}
@@ -206,4 +206,6 @@ An abstract visualization in \autoref{image:design:abstract} shows the bait syst
 	\caption{Abstract idea of this thesis system emplacement.}
 	\label{image:design:abstract}
 \end{figure}
+
+Apart from this emplacement, the designed system can be located anywhere in an internet (e.g. the Internet). Alternatively, a set of low interaction honeypots can used to proxy (or using a reverse proxy) the network to a local instance. This benefits from the flexibility of quickly moving the access points to a different zone, country or network.
 
