@@ -1,5 +1,5 @@
 \chapter{Analysis \label{anal}}
-This chapter introduces malware analysis (see~\autoref{anal:malware}) and differentiates the techniques (see~\autoref{anal:malware:dyn_stat}), outlines and describes mechanisms and environments utilized by cyber security professionals and companies (see~\autoref{anal:malware:mech_envs}), describes the virtualization technology KVM (see~\autoref{anal:virtual:kvm}) and the orchestration mechanism Kubernetes (see~\autoref{anal:virtual:k8s}).
+This chapter introduces malware analysis (see~\autoref{anal:malware}) and differentiates the techniques (see~\autoref{anal:malware:dyn_stat}), outlines and describes mechanisms and environments utilized by cyber security professionals and companies (see~\autoref{anal:malware:mech_envs}), describes the virtualization technology KVM (see~\autoref{anal:virtual:kvm}) and the orchestration mechanism Kubernetes (see~\autoref{anal:k8s}).
 
 \section{Malware analysis \label{anal:malware}}
 Monitoring a malicious actor, sample or an entity in any environment is interchangeable from the analyst point of view. Therefore, knowing the malware analysis techniques is crucial for secure monitoring of malicious actors. Malware analysis may be static and dynamic with varying tools and mechanisms \cite{article:malware_analysis_techniques} \cite{research:malware_analysis_2017}.
@@ -74,15 +74,15 @@ Another term is the Vagrant box. It is a specifically formatted unit packaging t
 % searching for processes running in container etc.
 Docker is very popular containerization technology used by developers and in production environments. Therefore a detailed explanation is not in scope of this thesis. On other hand this section covers deeper aspects of Docker and its mostly containers.
 
-Similarly to Vagrant (see \autoref{anal:virtual:kvm:vagrant}), a Docker image is defined in a manifest file called Dockerfile. The image is used to create a Docker container as a single unit. Multiple containers can share an image with different configuration to adapt to the current environment e.g. database configuration, port publishing, storage mounting. 
+Similarly to Vagrant (see~\autoref{anal:virtual:kvm:vagrant}), a Docker image is defined in a manifest file called Dockerfile. The image is used to create a Docker container as a single unit. Multiple containers can share an image with different configuration to adapt to the current environment e.g. database configuration, port publishing, storage mounting. 
 
 But, each container is uniquely identified by an ID and other resources and objects belonging to the single container e.g. mapped network interface, storage volumes. When not specifically configured, both networking and volumes/storage would be local to the container and be removed along with the container. In either case the data, networking and yet unmentioned processes are accessible from the host system. Main reference for the base information is the \texttt{docker inspect} command, which returns every settings, mounted directory, networking configuration and execution metadata.
 
-Julia Evans constructively discusses various container spying techniques dedicated to Docker in a video demonstration \cite{video:docker:spying}. Apart from Docker-specific spying with the \texttt{inspect} command, there is \texttt{nsenter} and the inspection of \texttt{overlayfs}. Nsenter is nearly equivalent to the \texttt{docker exec} command, but it executes a command with a specified namespace \cite{man:nsenter}. Despite knowing the container namespace, it has no requirements and is Linux native. The advantage over \texttt{docker exec} is that for nsenter the executed command/program (see \autoref{listing:nsenter:example}) does not needs to be installed in the target container.
+Julia Evans constructively discusses various container spying techniques dedicated to Docker in a video demonstration \cite{video:docker:spying}. Apart from Docker-specific spying with the \texttt{inspect} command, there is \texttt{nsenter} and the inspection of \texttt{overlayfs}. Nsenter is nearly equivalent to the \texttt{docker exec} command, but it executes a command with a specified namespace \cite{man:nsenter}. Despite knowing the container namespace, it has no requirements and is Linux native. The advantage over \texttt{docker exec} is that for nsenter the executed command/program (see~\autoref{listing:nsenter:example}) does not needs to be installed in the target container.
 
 \lstinputlisting[language=bash, style=codestyle, caption={Executes the \texttt{ip address} command within the network (option \texttt{-n}) namespace of a taget process with ID 6234}, label=listing:nsenter:example]{assets/listings/nsenter_cmd.example}
 
-"OverlayFS is a modern union filesystem that is similar to AUFS, but faster and with a simpler implementation" \cite{docs:docker:overlayfs}. As the Docker image is build, each compact change creates a new layer of the container root file system linked to the previous layer and including the difference. These layers can be inspected in the host system as bare directories. Mounted volumes are no exception and both can be identified from the \texttt{docker inspect} command output. \textit{/var/lib/docker/overlay2} stores all these layers (see \autoref{listing:overlay2:example}). 
+"OverlayFS is a modern union filesystem that is similar to AUFS, but faster and with a simpler implementation" \cite{docs:docker:overlayfs}. As the Docker image is build, each compact change creates a new layer of the container root file system linked to the previous layer and including the difference. These layers can be inspected in the host system as bare directories. Mounted volumes are no exception and both can be identified from the \texttt{docker inspect} command output. \textit{/var/lib/docker/overlay2} stores all these layers (see~\autoref{listing:overlay2:example}). 
 
 \lstinputlisting[language=bash, style=custom, caption={Container files, independent of the layer, are accessible from the host system. For example output the contents of an arbitrary file}, label=listing:overlay2:example]{assets/listings/overlay2.example}
 
@@ -129,18 +129,17 @@ The level of access via the Service depends on its type - ClusterIP, NodePort, L
 A LoadBalancer is a cloud provider-specific Service type combining NodePort and Cluster in a way to expose the Service over a public IP address. An advantage is an existing bare-metal implementation\footnote{MetalLB - Metal Load Balancer is a bare-metal LB implementation utilizing either a RM-OSI layer 2 routing or BGP \cite{docs:metallb}.} and the ability to expose reserved ports (e.g. 22, 80, 443).
 
 \section{Environment monitoring \label{anal:mon}}
-Knowing what and how to extract and monitor is vital to understanding the threat actor and the agenda. There are various mechanisms and possibilities to effectively observe container file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
+Knowing what and how to extract and monitor is vital to understanding the threat actor's agenda. There are various mechanisms and possibilities to effectively observe container activity events i.e. file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
 
 \begin{itemize}[noitemsep]
-	\item
-	from the container in form of an agent reporting events
-	\item 
-	from the node as agent-less programs "spying" on the containers
-	\item 
-	bpftool, bcc tools
+	\item From within the container as an agent reporting events over an associated Service.
+	\item Abuse the container-host mapped resources (e.g. network interfaces, container mounted directories) and stealthily spying.
 \end{itemize}
 
-Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is the transparency for the threat actor, since the container is observed from the hosting operating system. For example docker with the \textit{overlayfs} driver has a predefined directory for each container with the root FS.
+Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is transparency for a threat actor, since the container has an enclosed environment by namespaces \cite{blog:containers}. For example docker with the \textit{overlay} file system driver has a predefined location where each container root FS exists (unless the volume binding overrides this).
 
 \subsection{Existing solutions \label{anal:mon:exist}}
+%TODO: bcc, bpftool
 \texttt{Monks} \footnote{\url{https://github.com/alexandernst/monks}} works as a kernel module hijaking system calls on the target system. "Monks is like strace, but tracing all and every single process from any user, at any level" \cite{git:monks}. \texttt{execmon} \footnote{\url{https://github.com/kfiros/execmon}} is a similar utility intercepting the \textit{execve} syscalls in kernel and notifying the user. It's a kernel module combined with a user-land utility receiving events. For file system (FS) monitoring there is a CLI program \texttt{fswatch} \footnote{\url{https://github.com/emcrisostomo/fswatch}} acting as the API to the \textit{libfswatch}, which is ultimately an API to \textit{inotify}. It provides real time FS monitoring with the accuracy of one second. Fswatch distinguishes events based on the action (e.g. created, renamed, removed, owner changed).
+
+Related solutions are documented in the next chapter (see~\autoref{related}).
