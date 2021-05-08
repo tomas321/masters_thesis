@@ -129,17 +129,34 @@ The level of access via the Service depends on its type - ClusterIP, NodePort, L
 A LoadBalancer is a cloud provider-specific Service type combining NodePort and Cluster in a way to expose the Service over a public IP address. An advantage is an existing bare-metal implementation\footnote{MetalLB - Metal Load Balancer is a bare-metal LB implementation utilizing either a RM-OSI layer 2 routing or BGP \cite{docs:metallb}.} and the ability to expose reserved ports (e.g. 22, 80, 443).
 
 \section{Environment monitoring \label{anal:mon}}
-Knowing what and how to extract and monitor is vital to understanding the threat actor's agenda. There are various mechanisms and possibilities to effectively observe container activity events i.e. file system, networking and process execution. Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
+Knowing what and how to extract and monitor is vital to understanding the threat actor's agenda. There are various mechanisms and possibilities to effectively observe container activity events i.e. file system, networking and process execution. Full related solutions are documented in the next chapter (see~\autoref{related}). Regarding the expected setup of virtual machines hosting the Kubernetes cluster, the possible monitoring strategies are:
 
 \begin{itemize}[noitemsep]
 	\item From within the container as an agent reporting events over an associated Service.
 	\item Abuse the container-host mapped resources (e.g. network interfaces, container mounted directories) and stealthily spying.
 \end{itemize}
 
-Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is transparency for a threat actor, since the container has an enclosed environment by namespaces \cite{blog:containers}. For example docker with the \textit{overlay} file system driver has a predefined location where each container root FS exists (unless the volume binding overrides this).
+Container monitoring from the container itself may appear more straightforward, but it's similar to monitoring of a honeypot, where agents could be discovered or in other way uncovered by the threat actor. Since containers are wrapped environments hosted on the host machine, the file system, networking processes are readable. The apparent advantage is a transparent view of any monitoring for the threat actor, since the container has an enclosed environment by namespaces \cite{blog:containers}. For example docker with the \textit{overlay} file system driver has a predefined location where each container root FS exists (unless the volume binding overrides this).
 
-\subsection{Existing solutions \label{anal:mon:exist}}
-%TODO: bcc, bpftool
-\texttt{Monks} \footnote{\url{https://github.com/alexandernst/monks}} works as a kernel module hijaking system calls on the target system. "Monks is like strace, but tracing all and every single process from any user, at any level" \cite{git:monks}. \texttt{execmon} \footnote{\url{https://github.com/kfiros/execmon}} is a similar utility intercepting the \textit{execve} syscalls in kernel and notifying the user. It's a kernel module combined with a user-land utility receiving events. For file system (FS) monitoring there is a CLI program \texttt{fswatch} \footnote{\url{https://github.com/emcrisostomo/fswatch}} acting as the API to the \textit{libfswatch}, which is ultimately an API to \textit{inotify}. It provides real time FS monitoring with the accuracy of one second. Fswatch distinguishes events based on the action (e.g. created, renamed, removed, owner changed).
+\subsection{Existing tools \label{anal:mon:exist}}
+This section outlines a briefly discusses various applicable and suitable container activity monitoring tools.
 
-Related solutions are documented in the next chapter (see~\autoref{related}).
+\subsubsection*{BPF Compiler Collection (BCC)}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.2]{bcc}
+	\caption{}
+	\label{image:anal:mon:bcc}
+\end{figure}
+It's a state-of-the-art monitoring tools bundle used by large companies (e.g. Netflix, Facebook) \cite{blog:bcc}. BCC serves as front-end (CLI) program to various eBPF-based tools. Concretely, \textit{execsnoop}, \textit{opensnoop}, \textit{tcpaccept}, \textit{tcpconnect} and \textit{tcplife} are programs tracing \texttt{exec} syscalls, \texttt{open} syscalls, tcp \texttt{accept} and \texttt{connect} syscalls and tcp connection sessions respectively.
+
+Some BCC tools have a mount namespace option to filter the monitored events. This can potentially select a specific container. The mount namespace is passed via a BPF map object created by the \textit{bpftool} tool \cite{git:bcc:mntns}.
+
+\subsubsection*{monks}
+\textit{Monks}\footnote{\url{https://github.com/alexandernst/monks}} works as a kernel module hijacking system calls on the target system. "Monks is like strace, but tracing all and every single process from any user, at any level" \cite{git:monks}.
+
+\subsubsection*{execmon}
+\textit{Execmon}\footnote{\url{https://github.com/kfiros/execmon}} is a similar utility intercepting the \texttt{execve} system calls in kernel-space and notifies the user. It's a kernel module combined with a user-space utility receiving events.
+
+\subsubsection*{fswatch}
+For file system monitoring there is a CLI program \textit{fswatch} \footnote{\url{https://github.com/emcrisostomo/fswatch}} acting as the API to the \textit{libfswatch}, which is ultimately an API to \textit{inotify}. It provides real time FS monitoring with a second accuracy. Fswatch distinguishes events based on the action (e.g. created, renamed, removed, owner changed).
