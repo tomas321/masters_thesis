@@ -1,0 +1,37 @@
+---
+#
+# requires:
+#   - helm
+#   - setup metallb
+#   - metallb address pool 'default'
+#
+
+- hosts: m1.k8s-host.local
+  become: true
+  vars:
+    helm_repository:
+      name: prometheus-community
+      url: https://prometheus-community.github.io/helm-charts
+    helm_chart_name: prometheus-community/kube-prometheus-stack
+    helm_release_name: myprometheus
+  tasks:
+    - name: helm add stable repository
+      shell: >
+        helm repo add {{ helm_repository.name }} {{ helm_repository.url }}
+
+    - name: update helm repositories
+      shell: >
+        helm repo update
+
+    - name: install prometheus
+      shell: >-
+        helm upgrade {{ helm_release_name }} {{ helm_chart_name }} \
+             --namespace monitoring \
+             --create-namespace \
+             --set prometheus.service.type=LoadBalancer \
+             --set prometheus.service.annotations."metallb\.universe\.tf\/address\-pool"=default \
+             --set prometheusOperator.serviceMonitorSelector={} \
+             --set prometheusOperator.serviceMonitorNamespaceSelector={} \
+             --set kubeApiServer.tlsConfig.insecureSkipVerify=true \
+             --set grafana.service.type=LoadBalancer \
+             --set grafana.service.annotations."metallb\.universe\.tf\/address\-pool"=default
