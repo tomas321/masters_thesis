@@ -14,28 +14,33 @@ WORKER_NODE_COUNT = 2
 DATA_NODE_COUNT = 1
 $ip_counter = 1
 
-if not defined?('K8S_DOMAIN')
+$box_distro = (not defined? K8S_BOX_DISTRO) ? BOX_DISTRO : K8S_BOX_DISTRO
+$master_node_count = (not defined? K8S_MASTER_NODE_COUNT) ? MASTER_NODE_COUNT : K8S_MASTER_NODE_COUNT
+$worker_node_count = (not defined? K8S_WORKER_NODE_COUNT) ? WORKER_NODE_COUNT : K8S_WORKER_NODE_COUNT
+$data_node_count = (not defined? K8S_DATA_NODE_COUNT) ? DATA_NODE_COUNT : K8S_DATA_NODE_COUNT
+
+if not defined? K8S_DOMAIN
     STDERR.puts("undefined 'K8S_DOMAIN' environment (required format: 'dom.subdom.tld')")
     exit(false)
 else
     $k8s_domain = K8S_DOMAIN
 end
 
-if not defined?('K8S_SSH_PUBLIC_KEY_PATH')
+if not defined? K8S_SSH_PUBLIC_KEY_PATH
     STDERR.puts("undefined 'K8S_SSH_PUBLIC_KEY_PATH' environment")
     exit(false)
 else
     $public_key_path = K8S_SSH_PUBLIC_KEY_PATH
 end
 
-if not defined?('K8S_NODES_NET_PREFIX')
+if not defined? K8S_NODES_NET_PREFIX
     STDERR.puts("undefined 'K8S_NODES_NET_PREFIX' environment (required format: '10.2.1.')")
     exit(false)
 else
     $ip_prefix = K8S_NODES_NET_PREFIX
 end
 
-if not defined?('K8S_NETWORK_BRIDGE_NAME')
+if not defined? K8S_NETWORK_BRIDGE_NAME
     STDERR.puts("undefined 'K8S_NETWORK_BRIDGE_NAME' environment")
     exit(false)
 else
@@ -63,7 +68,7 @@ def create_node(config, prefix, i, ip)
 end
 
 Vagrant.configure("2") do |config|
-    config.vm.box = BOX_DISTRO
+    config.vm.box = $box_distro
     config.vm.synced_folder ".", "/vagrant", disabled: true
     config.vm.provider :libvirt do |libvirt|
         libvirt.management_network_name = "vagrant-mgmt"
@@ -73,21 +78,21 @@ Vagrant.configure("2") do |config|
     end
 
     # master nodes
-    (1..MASTER_NODE_COUNT).each do |i|
+    (1..$master_node_count).each do |i|
         $ip_counter += 1
         ip = "#{$ip_prefix}#{$ip_counter}"
         create_node(config, "master", i, ip)
     end
 
     # worker nodes
-    (1..WORKER_NODE_COUNT).each do |i|
+    (1..$worker_node_count).each do |i|
         $ip_counter += 1
         ip = "#{$ip_prefix}#{$ip_counter}"
         create_node(config, "node", i, ip)
     end
 
     # data node simulating remote storage server
-    (1..DATA_NODE_COUNT).each do |i|
+    (1..$data_node_count).each do |i|
         $ip_counter += 1
         ip = "#{$ip_prefix}#{$ip_counter}"
         create_node(config, "data", i, ip)
