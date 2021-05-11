@@ -13,12 +13,15 @@
     fswatch_repo_dest: "/opt/fswatch"
     fswatch_cmake_build_dir: "{{ fswatch_repo_dest }}/build"
     fswatch_cmake_target: "fswatch"
-    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T" %I'
+    fswatch_executable: "{{ fswatch_cmake_build_dir }}/fswatch/fswatch"
+    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T"'
+    fswatch_scripts_dir: "/usr/local/bin/fswatch"
+    fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
     fswatch_services: []
     sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
     sneakpeek_repo_branch: "develop"
     sneakpeek_repo_dest: "/tmp/sneakpeek"
-    sneakpeek_command: "{{ sneakpeek_repo_dest }}/sneakpeek.sh"
+    sneakpeek_command: "./sneakpeek.sh -t fswatch"
     sneakpeek_host: localhost
   tasks:
     - name: install fswatch dependencies
@@ -58,12 +61,25 @@
         params:
           --jobs: "{{ ansible_processor_cores * ansible_processor_threads_per_core }}"
 
+    - name: create fswatch script directory
+      file:
+        path: "{{ fswatch_scripts_dir }}"
+        state: directory
+
+    - name: copy fswatch caller script
+      template:
+        src: fswatch_caller.sh.j2
+        dest: "{{ fswatch_caller_script_abspath }}"
+        mode: 0750
+      register: caller_script
+
     - name: configure systemd unit file
       template:
         src: fswatch.service.j2
         dest: /etc/systemd/system/fswatch@.service
       register: unit_file
 
+# SNEAKPEEK section
     - name: clone sneakpeek to ansible host
       become: false
       delegate_to: "{{ sneakpeek_host }}"
@@ -78,6 +94,9 @@
       delegate_to: "{{ sneakpeek_host }}"
       run_once: true
       command: "{{ sneakpeek_command }}"
+      args:
+        chdir: "{{ sneakpeek_repo_dest }}"
+      register: outputt
 
     - name: retrieve all fswatch services
       shell: "systemctl --type=service --state=active | grep fswatch.* | awk '{print $1}'"
@@ -87,7 +106,7 @@
       set_fact:
         fswatch_services: "{{ fswatch_services + systemd_services.stdout_lines }}"
 
-    - name: ran the following services
+    - name: started the following services via sneakpeek.sh
       debug:
         msg: "{{ fswatch_services }}"
 
@@ -105,12 +124,12 @@
         name: fswatchers.target
 
     - name: restart fswatchers
-      when: "unit_file.changed or git_repo.changed"
+      when: "unit_file.changed or git_repo.changed or caller_script.changed"
       systemd:
         name: fswatchers.target
         state: restarted
 
-    - name: ensre the fswatch service is started
+    - name: ensure the fswatch service is started
       systemd:
         name: fswatchers.target
         state: started

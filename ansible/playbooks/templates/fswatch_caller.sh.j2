@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# start fswatch for a given container merged dir
+#
+# USAGE: $0 MERGED_DIR
+#
+
+usage="USAGE: $0 "
+[[ $# -lt 1 ]] && echo -e "error: bad number of args\n$usage" >/dev/stderr && exit 1
+
+merged_dir="$1"
+
+{{ fswatch_executable }} {{ fswatch_cmd_args }} "$merged_dir"
