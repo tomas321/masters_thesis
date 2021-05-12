@@ -1,0 +1,10 @@
+---
+
+fswatch_dependencies:
+  - git
+  - python3-pip
+
+fswatch_pip_dependencies:
+  - cmake
+
+fswatch_services: []
