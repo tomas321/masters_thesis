@@ -2,7 +2,5 @@
 
 - hosts: k8s-workers
   become: true
-  vars:
-    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.5 -r -x -t -f "%m-%d-%Y  %T"'
   roles:
     - fswatch

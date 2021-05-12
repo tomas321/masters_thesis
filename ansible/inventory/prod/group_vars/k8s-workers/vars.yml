@@ -11,13 +11,13 @@ fswatch_cmake_target: "fswatch"
 
 # fswatch program call variables
 fswatch_executable: "{{ fswatch_cmake_build_dir }}/fswatch/fswatch"
-fswatch_cmd_args: '-l 0.5 -r -x -t -f "%m-%d-%Y  %T"'
+fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.5 -r -x -t -f "%m-%d-%Y  %T"'
 fswatch_scripts_dir: "/usr/local/bin/fswatch"
 fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
 
 # sneakpeek variable
 sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
-sneakpeek_repo_branch: "master"
+sneakpeek_repo_branch: "develop"
 sneakpeek_repo_dest: "/tmp/sneakpeek"
 sneakpeek_command: "./sneakpeek.sh -t fswatch"
 sneakpeek_host: localhost
