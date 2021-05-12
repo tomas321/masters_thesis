@@ -1,23 +1,140 @@
 \chapter{Implementation \label{implementation}}
+In design \autoref{design} all required techniques and tools were addressed and in this chapter the solution is documented. The design system is a deception technology monitoring the activity of present users or processes. Each section describes used technology, sub-problem solutions and possible changes in comparison to the designed solution.
+
+\section{Kubernetes \label{implementation:k8s}}
+The cluster is hosted on VMs sharing a common host machine, which meets certain specifications outlined in \autoref{design:specs}. The base system consists of four VMs (see~\autoref{image:design:k8s}), each serving its purpose in the Kubernetes cluster. Precisely, there are three cluster nodes with one additional VM serving a data node. To begin with, almost all configuration and provisioning operations are covered by Ansible roles and playbooks (see Appendix \autoref{appendix:ansible:structure}).
+
+\subsection{Deployment \label{implementation:k8s:deploy}}
+%To meet the requirements 
+The Vagrantfile is partially configurable via environment variables specified in extra \textit{environment.rb} (see~\autoref{listing:vagrant:environment}) file located in the same directory. Even though, they are environment variables, they inclusion in a separate ruby file is necessary.
+
+\begin{lstlisting}[language=bash, style=custom, caption={Contents of the \textit{environment.rb}. These all available variables to configure a new deployment in different environment. Applying these variables, Vagrant create four (one master, two worker and one data node) based on \textit{generic/ubuntu1804} box. Furthermore connects each node to \textit{mybr0} network bridge and sequentially assigns IP addresses and hostnames based on the \texttt{172.30.0.0/24} network and \texttt{k8s-host.local} higher level domain respectively.}, label=listing:vagrant:environment]
+# mandatory 
+K8S_NETWORK_BRIDGE_NAME = "mybr0"
+K8S_NODES_NET_PREFIX = "172.30.0."  # string prefix representation of 172.30.0.0/24
+K8S_DOMAIN = "k8s-host.local"
+K8S_SSH_PUBLIC_KEY_PATH = "~/.ssh/id_vagrant_k8s.pub"
+
+# optional with default value
+K8S_BOX_DISTRO = "generic/ubuntu1804"
+K8S_MASTER_NODE_COUNT = 1
+K8S_WORKER_NODE_COUNT = 2
+K8S_DATA_NODE_COUNT = 1
+\end{lstlisting}
+
+The dependencies are the existence of the SSH public key, the network bridge and its IP address corresponding the prefix. The Ansible playbook \textit{vagrant\_k8s\_up.yml} prepares the dependencies, configures the Vagrantfile environment variables and runs \texttt{vagrant up}. At any point the base system can be halted with an opposing playbook \textit{vagrant\_k8s\_down.yml} At this point the base system is ready for Kubernetes cluster configuration utilizing \textit{kubespray} with specifically changed variables outlined in \autoref{listing:kubespray:vars}. To reproduce the procedure of installation follow the official guidance\footnote{\url{https://github.com/kubespray/kubespray/blob/master/README.md}}. With the defined configuration, kubespray setups Kubernetes with the additional \textit{helm}\footnote{\url{https://helm.sh/}} package manager for more convenient resource deployment.
+
+\begin{lstlisting}[language=Clean, style=custom, caption={Changed variables in the created inventory. In addition to the the hosts defined in \textit{hosts.yaml} file, kubespray defaults with two master nodes for the setup of three nodes in total - this is changed to one master node.}, label=listing:kubespray:vars]
+helm_enabled: true
+\end{lstlisting}
+
+\subsection{Environments \label{implementation:k8s:envs}}
+A Kubernetes environment in terms of this thesis is a collection of resources within the same namespace (virtual cluster). Before deploying creating any resources there are a couple of playbooks setting up the data node, load balancer, cluster monitoring and the \texttt{kubectl} tool.
 
 \begin{itemize}[noitemsep]
-	\item 
-	Manage base setup of Kubernetes nodes via Vagrant.
-	\item 
-	Deployment of those Vagrant based virtual machines (including networking setup) and Kubernetes (via kubespray \footnote{\url{https://kubespray.io/}}) is done by Ansible.
-	\item 
-	Kubernetes environments are maintained \footnote{\url{https://github.com/tomas321/k8s-environment-scenarios}} separately.
-	\item
-	Sneakpeek \footnote{\url{https://github.com/tomas321/sneakpeek}} properly parses the docker container information. It groups nodes with user defined containers created by the Kubernetes orchestration from deployments and pods. Ultimately used for getting the container root FS directory.
-	\item
-	Fswatch \footnote{\url{https://github.com/tomas321/fswatch}} is a fork with simple improvements and features. It's ran on every acquired container root directory.
-	\item
-	All is automated with Ansible.	
-	
+	\item \texttt{nfs.yml} -- Installs the NFS server on the data node and setups the NFS share directory.
+	\item \texttt{metallb.yml} -- Deploys the MetalLB load balancer related resources to Kubernetes.
+	\item \texttt{prometheus.yml} -- Setups Prometheus monitoring using the Helm package manager. A couple of arguments configure it and Grafana to retrieve an "public" IP address from the MetalLB address pool, isolate them to a separate namespace and other.
+	\item \texttt{kubectl.yml} -- Completely configures the \texttt{kubectl} tool with bash auto-complete.
 \end{itemize}
 
-- network traffic is monitored by tapping to the mapped interface on the host system
-1. get the docker container pid
-2. us nsenter to execute 'ip addr' to get the main net interface
-3. from that get the mapped interface 
-4. tap on that interface with tcpdump or some other software
+The environments designed and used are held is a separate git repository\footnote{\url{https://github.com/tomas321/k8s-environment-scenarios}}. The chosen applications and services are not that important and would require a whole research process, because it's dependent on the user. Even though, concentrating on vulnerable software is a convenient way of baiting an attacker.
+
+Although, as of now, there is only one environment grouping multiple applications and services - Elasticsearch with Kibana, mail server\footnote{\url{https://github.com/technicalguru/docker-mailserver/tree/master/examples/kubernetes}}, git service Gitea and a custom vulnerable SSH service (vulnerable-ssh). Although, at the time of writing, not all applications are functional. The environment is meant to be versatile to mimic a production system.
+
+For the sake of a proof-of-concept (PoC) vulnerable-ssh is the most important Pod configured with OpenSSH \textit{6.6p1-2ubuntu2.13} and most importantly Bash \textit{4.3.0(1)-release}. As such, the whole environment is considered vulnerable to the shellshock attack exploiting a Bash vulnerability (CVE-2014-6271 \cite{cve:shellshock}) and leading the attacker to run arbitrary code.
+
+\section{Container monitoring \label{implementation:mon}}
+
+
+\subsection{Reconnaissance \label{implementation:mon:recon}}
+While gathering information of the system dynamically, a set od Bash scripts creates a necessary map of all the container in the environment. A collection tool \textit{sneakpeek}\footnote{\url{https://github.com/tomas321/sneakpeek}} queries the Kubernetes and Docker API, process information and setups the some of the monitoring features.
+
+\begin{itemize}[noitemsep]
+	\item \texttt{sneakpeek.sh} -- Main script calling sequentially all other scripts. It operates in two main options. \textit{fswatch} for setting up the file system monitoring as systemd services based on the "merged directory" of the docker container. \textit{procmon} for setting up the process execution monitoring with container segregation via BPF maps holding the mount namespaces.
+	\item \texttt{get\_all\_containers.sh} -- Maps the node IP address to the Docker container and returns it as comma-separated lines.
+	\item \texttt{get\_container\_ns.sh} -- It is executed on each node and essentially retrieves the mount namespace of each container. (see~\autoref{listing:sneakpeek:mntns}).
+	\item \texttt{bpftool\_map\_container\_ns.sh} -- It manages the creation of BPF maps holding the mount namespaces and starts the process monitoring \textit{systemd} services.
+\end{itemize}
+
+\begin{lstlisting}[language=bash, style=custom, caption={The main piece of script code for retrieving the muont namespace inode number of the given container. This is executed for each container on a corresponding node.}, label=listing:sneakpeek:mntns]
+pid=$(sudo docker inspect $CONTAINER | jq -r '.[0].State.Pid');
+echo $(sudo stat -Lc '%i' /proc/$pid/ns/mnt)
+\end{lstlisting}
+
+In the first iteration of development the prime script \texttt{get\_all\_containers.sh} was slowing down the whole execution due to iterating through all cluster nodes and executing programs over SSH protocol. \autoref{listing:sneakpeek:timing} shows that the improved version was 40 times faster.
+
+\begin{lstlisting}[language=bash, label=listing:sneakpeek:timing]
+sneakpeek$ time ./get_all_containers.sh 1>/dev/null
+
+real    0m0,404s
+user    0m0,163s
+sys     0m0,035s
+sneakpeek$ time ./get_all_containers.sh.old 1>/dev/null
+
+real    0m16,896s
+user    0m1,695s
+sys     0m0,402s
+\end{lstlisting}
+
+\subsection{Threat hunting \label{implementation:mon:hunting}}
+% TODO: add network monitoring
+Visibility and control is vital to successfully threat hunt a occurring attack. Additional tools are deployed to monitor the process execution and FS changes. Namely the \texttt{execsnoop} syscall spying tool and \texttt{fswatch} respectively. Fswatch is a forked\footnote{\url{https://github.com/tomas321/fswatch}} Github project and additionally modified to meet the requirements. Execsnoop is a ready to use tool form the BCC dependent on the latest kernel version.
+
+\subsubsection*{Fswatch}
+The existing project is functional as is. Although changing the timestamp precision and file event exclusion feature was necessary. Since it's working with \textit{sys/inotify} library, the shortest unit of time is a second. So the precision change is only in the fswatch application layer. It required a thorough inspection of the whole source code to cover each timestamp usage.
+
+Fswatch knows and differentiates FS events. Although, a feature to exclude some events from all the whole selection was missing. The necessity was due to better readability of various usage scenarios when the requested events differ and this speeds up the process.
+
+\begin{lstlisting}[language=bash, style=custom, caption={}, label=listing:fswatch:cmd]
+fswatch --ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.5 -r -x -t -f "%m-%d-%Y  %T" $DIR
+
+# example output triggered after:
+# `echo "Almost there" > $DIR/tmp/flag`
+05-12-2021  16:31:07.816426 $DIR/tmp/flag Created
+05-12-2021  16:31:07.816494 $DIR/tmp/flag Updated
+\end{lstlisting}
+\autoref{listing:fswatch:cmd} shows the command arguments used for each instance of FS monitoring process. As mentioned before, here four of 14 known events are ignored using the \textit{--ex-event} option, because they produce too many uninteresting events triggered by common programs e.g. \texttt{ls}. To not drain the CPU a latency of maximum 0.5 seconds is chosen and followed by recursive (\texttt{-r}) \textit{\$DIR} directory monitoring. Output-related flags are for including the event identifier (\texttt{-x}), timestamp of occurrence (\texttt{-t}) with a specific format (\texttt{-f "\%m-\%d-\%Y  \%T"}).
+
+\subsubsection*{Execsnoop}
+% explain the usage and the creation of the bpf map
+% maybe not mention its from the official docs
+Each execsnoop instance is operating in a specified mount namespace shared over a BPF map. This is ensured by the \texttt{bpftool} backed by the latest kernel. \autoref{listing:bpftool:snippet} is a \texttt{bpftool\_map\_container\_ns.sh} script snippet for creating the BPF map (mapped to a specific file typically in \textit{/sys/fs/bpf} directory) if not present already and updates it with a the mount namespace. Additionally, it starts the templated execsnoop systemd services.
+
+\begin{lstlisting}[language=bash, style=custom, caption={Setup of BPF map for sharing the mount namespave with execsnoop instance. INODE variable is retrieved using the command sequence specified in \autoref{listing:sneakpeek:mntns}}, label=listing:bpftool:snippet]
+FILE=/sys/fs/bpf/mnt_ns_container1
+NAME="${FILE##*/}"
+NS_ID_HEX="$(printf '%016x' $INODE | sed 's/.\{2\}/&\n/g' | tac | tr '\n' ' ')"
+
+# check if eBPF map already exists
+bpfmap=$(sudo bpftool map show pinned $FILE 2>/dev/null)
+if [ $? -eq 0 ]; then
+  id=$(echo $bpfmap | cut -d: -f1)
+  sudo bpftool map dump id $id | grep -q -i "$NS_ID_HEX"
+  if [ $? -eq 0 ]; then
+    # eBPF map already exists
+    sudo systemctl start execsnoop@$NAME; exit 0
+  fi
+else
+  # creating eBPF map '$FILE'
+  sudo bpftool map create $FILE type hash key 8 value 4 entries 128 name $NAME flags 0
+fi
+
+# updating eBPF map with inode ID '$NS_ID_HEX'
+sudo bpftool map update pinned $FILE key hex $NS_ID_HEX value hex 00 00 00 00 any
+\end{lstlisting}
+
+\subsubsection*{Deployment}
+Both fswatch and execsnoop are deployed and configured using the combination of \texttt{sneakpeek.sh} script and Ansible playbooks.
+\begin{itemize}
+	\item \texttt{fswatch.yml} - Fully configures all nodes with fswatch by runnig the \texttt{sneakpeek.sh} script and ultimately starting systemd services for each container.
+	\item \texttt{execsnoop.yml} - Similarly, completely configures the nodes with process monitoring running execsnoop as systemd services.
+\end{itemize}
+All are logging their according the \ref{iso.12.4}. The attackers agenda can be identified by inspecting the logged information in the designated location - \textit{/var/log/sneakpeek}. 
+
+
+%- network traffic is monitored by tapping to the mapped interface on the host system
+%1. get the docker container pid
+%2. us nsenter to execute 'ip addr' to get the main net interface
+%3. from that get the mapped interface 
+%4. tap on that interface with tcpdump or some other software

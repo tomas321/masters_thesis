@@ -1,0 +1,32 @@
+├── inventory
+│   ├── dev
+│   └── prod
+├── playbooks
+│   ├── bcc.yml
+│   ├── bridge-networking.yml
+│   ├── execsnoop.yml
+│   ├── fswatch.yml
+│   ├── kubectl.yml
+│   ├── kvm-networks.yml
+│   ├── latex.yml
+│   ├── metallb.yml
+│   ├── nfs_delete_objects.yml
+│   ├── nfs.yml
+│   ├── prometheus.yml
+│   ├── setup_kvm.yml
+│   ├── simple_bridge.yml
+│   ├── sneakctl_server.yml
+│   ├── vagrant_k8s_down.yml
+│   └── vagrant_k8s_up.yml
+└── roles
+    ├── ansible-config-interfaces
+    ├── ansible-kvm
+    ├── ansible-openvswitch
+    ├── ansible-role-latex
+    ├── bcc
+    ├── execsnoop
+    ├── metallb
+    ├── nfs
+    └── sneakctl
+        ├── client
+        └── server
