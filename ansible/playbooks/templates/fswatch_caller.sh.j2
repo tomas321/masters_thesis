@@ -2,12 +2,15 @@
 #
 # start fswatch for a given container merged dir
 #
-# USAGE: $0 MERGED_DIR
+# USAGE: $0 CONTAINER
+#
+#   CONTAINER - either ID or full name
 #
 
-usage="USAGE: $0 "
+usage="USAGE: $0 CONTAINER"
 [[ $# -lt 1 ]] && echo -e "error: bad number of args\n$usage" >/dev/stderr && exit 1
 
-merged_dir="$1"
+container="$1"
+merged_dir=$(sudo docker inspect $container | jq -r '.[].GraphDriver.Data.MergedDir')
 
 {{ fswatch_executable }} {{ fswatch_cmd_args }} "$merged_dir"

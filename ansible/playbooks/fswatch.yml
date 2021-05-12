@@ -1,6 +1,6 @@
 ---
 
-- hosts: k8s-cluster
+- hosts: k8s-workers
   become: true
   vars:
     fswatch_dependencies:
@@ -14,7 +14,7 @@
     fswatch_cmake_build_dir: "{{ fswatch_repo_dest }}/build"
     fswatch_cmake_target: "fswatch"
     fswatch_executable: "{{ fswatch_cmake_build_dir }}/fswatch/fswatch"
-    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.1 -r -x -t -f "%%m-%%d-%%Y  %%T"'
+    fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.5 -r -x -t -f "%m-%d-%Y  %T"'
     fswatch_scripts_dir: "/usr/local/bin/fswatch"
     fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
     fswatch_services: []
