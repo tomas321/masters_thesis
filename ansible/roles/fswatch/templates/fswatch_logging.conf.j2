@@ -1,0 +1,4 @@
+$template dynamicFile,"{{ fswatch_log_basepath }}/%programname%.log"
+
+if $programname startswith 'fswatch' then ?dynamicFile
+& stop

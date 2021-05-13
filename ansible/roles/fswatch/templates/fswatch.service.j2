@@ -5,3 +5,6 @@ PartOf=fswatchers.target
 [Service]
 Restart=always
 ExecStart={{ fswatch_caller_script_abspath }} %I
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=fswatch_%i

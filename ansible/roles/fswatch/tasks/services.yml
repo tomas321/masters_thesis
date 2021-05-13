@@ -1,0 +1,37 @@
+---
+
+- name: retrieve all fswatch services
+  shell: "systemctl --type=service --state=active | grep fswatch.* | awk '{print $1}'"
+  register: systemd_services
+
+- name: wirte systemd services to variable
+  set_fact:
+    fswatch_services: "{{ fswatch_services + systemd_services.stdout_lines }}"
+
+- name: started the following services via sneakpeek.sh
+  debug:
+    msg: "{{ fswatch_services }}"
+
+- name: configure systemd target file
+  template:
+    src: fswatchers.target.j2
+    dest: /etc/systemd/system/fswatchers.target
+  register: systemd_target
+
+- name: enable the service
+  when: "unit_file.changed or systemd_target.changed"
+  systemd:
+    daemon_reload: true
+    enabled: true
+    name: fswatchers.target
+
+- name: restart fswatchers
+  when: "unit_file.changed or git_repo.changed or caller_script.changed"
+  systemd:
+    name: fswatchers.target
+    state: restarted
+
+- name: ensure the fswatch service is started
+  systemd:
+    name: fswatchers.target
+    state: started

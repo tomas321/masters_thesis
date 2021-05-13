@@ -1,5 +1,7 @@
 ---
 
+sneakpeek_log_basepath: "/var/log/sneakpeek"
+
 # fswatch repository variables
 fswatch_repo_url: "https://github.com/tomas321/fswatch"
 fswatch_repo_branch: "develop"
@@ -14,6 +16,7 @@ fswatch_executable: "{{ fswatch_cmake_build_dir }}/fswatch/fswatch"
 fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=PlatformSpecific -l 0.5 -r -x -t -f "%m-%d-%Y  %T"'
 fswatch_scripts_dir: "/usr/local/bin/fswatch"
 fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
+fswatch_log_basepath: "{{ sneakpeek_log_basepath }}"
 
 # sneakpeek variable
 sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"

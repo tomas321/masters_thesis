@@ -1,0 +1,56 @@
+---
+
+- name: install fswatch dependencies
+  apt:
+    update_cache: true
+    name: "{{ fswatch_dependencies }}"
+
+- name: install fswatch pip dependencies
+  pip:
+    name: "{{ fswatch_pip_dependencies }}"
+
+- name: clone fswatch repository
+  git:
+    repo: "{{ fswatch_repo_url }}"
+    version: "{{ fswatch_repo_branch }}"
+    dest: "{{ fswatch_repo_dest }}"
+  register: git_repo
+
+- name: create build dir
+  when: git_repo.changed
+  file:
+    path: "{{ fswatch_cmake_build_dir }}"
+    state: directory
+
+- name: cmake fswatch
+  when: git_repo.changed
+  command: >
+    cmake --target {{ fswatch_cmake_target }} {{ fswatch_repo_dest }}
+  args:
+    chdir: "{{ fswatch_cmake_build_dir }}"
+
+- name: make fswatch
+  when: git_repo.changed
+  make:
+    chdir: "{{ fswatch_cmake_build_dir }}"
+    target: "{{ fswatch_cmake_target }}"
+    params:
+      --jobs: "{{ ansible_processor_cores * ansible_processor_threads_per_core }}"
+
+- name: create fswatch script directory
+  file:
+    path: "{{ fswatch_scripts_dir }}"
+    state: directory
+
+- name: copy fswatch caller script
+  template:
+    src: fswatch_caller.sh.j2
+    dest: "{{ fswatch_caller_script_abspath }}"
+    mode: 0750
+  register: caller_script
+
+- name: configure systemd unit file
+  template:
+    src: fswatch.service.j2
+    dest: /etc/systemd/system/fswatch@.service
+  register: unit_file
