@@ -2,6 +2,18 @@
 
 sneakpeek_log_basepath: "/var/log/sneakpeek"
 
+# execsnoop variables
+execsnoop_executable: /usr/share/bcc/tools/execsnoop
+execsnoop_cmd_args: "-t -T"
+execsnoop_scripts_dir: /usr/local/bin/execsnoop
+execsnoop_bpfmap_basepath: /sys/fs/bpf
+execsnoop_log_basepath: "{{ sneakpeek_log_basepath }}"
+
+# cron related variables
+execsnoop_cron_time:
+  minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
+  # hour: '0-23'
+
 # fswatch repository variables
 fswatch_repo_url: "https://github.com/tomas321/fswatch"
 fswatch_repo_branch: "develop"
