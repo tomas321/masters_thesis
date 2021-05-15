@@ -36,21 +36,3 @@
     target: "{{ fswatch_cmake_target }}"
     params:
       --jobs: "{{ ansible_processor_cores * ansible_processor_threads_per_core }}"
-
-- name: create fswatch script directory
-  file:
-    path: "{{ fswatch_scripts_dir }}"
-    state: directory
-
-- name: copy fswatch caller script
-  template:
-    src: fswatch_caller.sh.j2
-    dest: "{{ fswatch_caller_script_abspath }}"
-    mode: 0750
-  register: caller_script
-
-- name: configure systemd unit file
-  template:
-    src: fswatch.service.j2
-    dest: /etc/systemd/system/fswatch@.service
-  register: unit_file

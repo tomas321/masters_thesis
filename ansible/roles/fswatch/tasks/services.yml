@@ -1,5 +1,23 @@
 ---
 
+- name: create fswatch script directory
+  file:
+    path: "{{ fswatch_scripts_dir }}"
+    state: directory
+
+- name: copy fswatch caller script
+  template:
+    src: fswatch_caller.sh.j2
+    dest: "{{ fswatch_caller_script_abspath }}"
+    mode: 0750
+  register: caller_script
+
+- name: configure systemd unit file
+  template:
+    src: fswatch.service.j2
+    dest: /etc/systemd/system/fswatch@.service
+  register: unit_file
+
 - name: retrieve all fswatch services
   shell: "systemctl --type=service --state=active | grep fswatch.* | awk '{print $1}'"
   register: systemd_services
@@ -18,10 +36,13 @@
     dest: /etc/systemd/system/fswatchers.target
   register: systemd_target
 
-- name: enable the service
+- name: restart daemon
   when: "unit_file.changed or systemd_target.changed"
   systemd:
     daemon_reload: true
+
+- name: enable the service and restart daemon
+  systemd:
     enabled: true
     name: fswatchers.target
 

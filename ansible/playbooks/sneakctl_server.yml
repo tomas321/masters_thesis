@@ -1,6 +1,6 @@
 ---
 
-- hosts: k8s-cluster
+- hosts: k8s-workers
   become: true
   roles:
     - role: sneakctl/server

@@ -3,7 +3,10 @@ Description="execsnoop container %I"
 #PartOf=execsnoops.target
 
 [Service]
-Restart=always
+Restart=no
+Type=forking  # looks for forked processes spawned by the ExecStart
+PIDFile=/run/execsnoop_%i.pid
+ExecStop=/bin/kill -9 $MAINPID
 ExecStart={{ execsnoop_caller_script_abspath }} {{ execsnoop_bpfmap_basepath | regex_replace('\\/$', '') }}/%i
 StandardOutput=syslog
 StandardError=syslog

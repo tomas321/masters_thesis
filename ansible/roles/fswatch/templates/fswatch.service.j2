@@ -3,7 +3,10 @@ Description="watching FS changes of %I"
 PartOf=fswatchers.target
 
 [Service]
-Restart=always
+Restart=no
+Type=forking  # looks for forked processes spawned by the ExecStart
+PIDFile=/run/fswatch_%i.pid
+ExecStop=/bin/kill -9 $MAINPID
 ExecStart={{ fswatch_caller_script_abspath }} %I
 StandardOutput=syslog
 StandardError=syslog

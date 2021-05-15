@@ -11,6 +11,6 @@ usage="USAGE: $0 CONTAINER"
 [[ $# -lt 1 ]] && echo -e "error: bad number of args\n$usage" >/dev/stderr && exit 1
 
 container="$1"
-merged_dir=$(sudo docker inspect $container | jq -r '.[].GraphDriver.Data.MergedDir')
+merged_dir=$(docker inspect $container | jq -r '.[].GraphDriver.Data.MergedDir')
 
 {{ fswatch_executable }} {{ fswatch_cmd_args }} "$merged_dir"
