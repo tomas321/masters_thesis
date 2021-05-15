@@ -1,20 +1,21 @@
+├── hosts
 ├── inventory
 │   ├── dev
 │   └── prod
 ├── playbooks
 │   ├── bcc.yml
-│   ├── bridge-networking.yml
 │   ├── execsnoop.yml
+│   ├── files
+│   │   └── .ssh
+│   │       ├── id_vagrant_k8s
+│   │       └── id_vagrant_k8s.pub
 │   ├── fswatch.yml
 │   ├── kubectl.yml
-│   ├── kvm-networks.yml
-│   ├── latex.yml
 │   ├── metallb.yml
 │   ├── nfs_delete_objects.yml
 │   ├── nfs.yml
 │   ├── prometheus.yml
 │   ├── setup_kvm.yml
-│   ├── simple_bridge.yml
 │   ├── sneakctl_server.yml
 │   ├── vagrant_k8s_down.yml
 │   └── vagrant_k8s_up.yml
@@ -25,8 +26,9 @@
     ├── ansible-role-latex
     ├── bcc
     ├── execsnoop
+    ├── fswatch
     ├── metallb
     ├── nfs
     └── sneakctl
-        ├── client
         └── server
+

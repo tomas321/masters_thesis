@@ -38,7 +38,7 @@
 
 % References segment
 \begin{refsegment}
-
+\pagenumbering{arabic}
 % Introduction
 %\clearpage\null
 \input{content/intro}
@@ -61,11 +61,11 @@
 
 % Conclusion
 % \clearpage\null
-% \input{content/conclusion}
+\input{content/conclusion}
 
 % Resume
 % \clearpage\null
-% \input{content/resume}
+\input{content/resume}
 
 % Bibliography
 %\clearpage\null
@@ -76,13 +76,16 @@
 % Appendix
 \appendix
 
-\clearpage\null
+%\clearpage\null
 \include{appendices/ansible}
 
-\clearpage\null
+%\clearpage\null
 \include{appendices/vagrant}
 
-\clearpage\null
+%\clearpage\null
+\include{appendices/sneakctl}
+
+%\clearpage\null
 \include{appendices/cdrom}
 
 \end{document}

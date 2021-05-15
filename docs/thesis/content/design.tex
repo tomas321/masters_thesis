@@ -34,7 +34,7 @@ The considered specific control categories of the "Information technology -- Sec
 %- 12.2  - slightly compliant on the host system, but not much can be done on a bait system
 %- 12.3   X
 %- 12.4   X (implementation) - all soft developed keeps a log file with metrics/data but also execution logs - monitoring with prometheus of basic linux metrics
-%- 12.5  - mention semantic verionsing in monitoring (software used) + ansible like everything is pamametrized to be able to rollback
+%- 12.5   X (imple) - mention semantic verionsing in monitoring (software used) + ansible like everything is pamametrized to be able to rollback
 %13       X
 %- 13.1   X
 %14       X
@@ -48,9 +48,6 @@ The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriv
 The main specification defines that all VMs are identical and configured for remote operations, have functional inter-VM communication and meet all requirements (e.g. kernel version, basic security settings, hardening). Creating multiple identical VMs can be achieved by preceding mechanisms (e.g. \textit{cloud-init}\footnote{https://github.com/canonical/cloud-init}), sharing the same image or by provisioning mechanisms (e.g. \textit{Vagrant}, \textit{Ansible}).
 
 It depends on the implementation, but since these VMs have a static and simple setup, preceding is not necessary. This technique is fully configurable and must be automated or manually ran for each VM with deviating variables e.g. host name, IP address. This is not a complicated process, but a more suitable approach is using a shared pre-configured image combined with a dedicated tool - Vagrant for seamless provisioning and installation. KVM with libvirt and Vagrant create a "VM as code" concept efficient in provisioning, preceding and whole VM management.
-
-% TODO: move to implementation part
-% This is where Vagrant comes in place to effectively manage the creation of custom VMs. In addition to Vagrant there is also inter-VM networking and choice of virtualization provider.
 
 \subsubsection*{Setup \label{design:env-arch:base:setup}}
 Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mention in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster. Both of these networks are represented as Linux network bridges and are segregated to comply with \ref{iso.13.1}.
@@ -119,7 +116,8 @@ Each environment covers a whole system with multiple applications and subsystems
 
 Technically, an environment in terms of this thesis is a collection of YAML files stored in a remote repository easily deployed to the cluster. More specifically, Kubernetes \textit{pods}, \textit{services}, configuration (via e.g. \textit{configmaps}, \textit{secrets}), mounted volumes and/or permission-related objects. Practically, pods are replaced with \textit{deployments} and published services are using service type \textit{LoadBalancer} (utilizes MetalLB).
 
-%TODO: maybe include a design of several environments only from the application POV e.g. scenario1 - FTP + mail + blog + gitlab, scenario2 - microservice application with multiple pods ...
+%TODO: maybe include a design of several environments only from the application POV e.g. scenario1 - FTP + mail + blog + gitlab, scenario2 - microservice application with multiple pods ...  should satisfy but maybe more
+They create trustworthy systems providing something to acquire by malicious actors. Therefore, including intentionally inaccessible application simply to serves as bait. This does not imply that most of the services are secured, on the contrary the environment is only intentionally vulnerable.
 
 \section{Container monitoring \label{design:con-mon}}
 Monitoring a container requires to observe container file system, networking and process execution in the most efficient way. Inspired by some related solutions, this section describes the monitoring mechanisms, tools and techniques utilized in this thesis.
@@ -169,15 +167,14 @@ Docker container metadata provide all the necessary information to locate the co
 
 Detecting executed processes is a more sofisticated issue, but using the right technique is important. eBPF enables the tool \textit{execsnoop} to tap into the kernel and record system calls. Fortunately, execsnoop allows various filtering options. Specifically the mount namespace efficiently isolates the observable system calls within a single container. For execsnoop the mount namespace identifier is shared over the BPF map objects using \textit{bpftool}, which are available for a latest kernel version requirement mentioned in \autoref{design:specs}.
 
-Last of the event types - network traffic monitoring is much more intuitive and native to the architecture and technology used. Since the applications within the cluster are virtualized, the pod network interfaces can be traced to host accessible interfaces. Consequently, a tool taps on to the interface and effectively scans the whole traffic including a pod-to-pod and pod-to-external communications. This leaves open possibilities to tools like \textit{DPDK}, python \textit{scapy}, \textit{libpcap} library or netflow collectors like \textit{suricata}, Although the design expects many pods with many interfaces, so the network traffic collector should have a minimal overhead. % TODO: add the packet capture tool used
+Last of the event types - network traffic monitoring is much more intuitive and native to the architecture and technology used. Since the applications within the cluster are virtualized, the pod network interfaces can be traced to host accessible interfaces. Consequently, a tool taps on to the interface and effectively scans the whole traffic including a pod-to-pod and pod-to-external communications. This leaves open possibilities to tools like \textit{DPDK}, python \textit{scapy}, \textit{libpcap} library or netflow collectors like \textit{suricata}. Alternatively, monitoring of active TCP connection could be sufficient for deterministic network activity e.g. the BCC \textit{tcptracer} tool. Although the design expects many pods with many interfaces, so the network traffic collector should have a minimal overhead.
 
 \subsubsection*{Control tool \label{design:mon:tools:main}}
+% TODO: in text
 The main control (\textit{API server}) tool is for managing and controlling all of the above mentioned tools and functionality. It is a centralized API server, which has access to the execsnoop, fswatch and nettool (\textbf{TODO change}) for basic management. Additionally, API server provides additional threat hunting functionality such as:
 \begin{itemize}[noitemsep]
-	\item running process information
-	\item file information \textbf{MUST IMPLEMENT}
-	\item \textbf{TODO other}
-	% todo: !!!
+	\item Running process information.
+	\item File statistics.
 \end{itemize}
 
 \subsubsection*{Kubernetes monitoring \label{design:mon:tools:k8s}}

@@ -1,0 +1,26 @@
+\setcounter{figure}{0}
+\setcounter{listing}{0}
+
+\chapter{sneakctl API server \label{appendix:sneakctl}}
+
+\begin{lstlisting}[language=Clean, style=custom, label=appendix:sneakctl:api, caption={Outline of sneakctl API server endpoints.}]
+'/fswatch/status'
+/fswatch/services
+/fswatch/services/SERVICE DATA
+  - SERVICE: service name or '_all'
+  - DATA - {"action": "ACTION"} or nothing in case of GET request
+    - ACTION - one of [start, stop, restart]
+
+/execsnoop/status
+/execsnoop/services
+/execsnoop/services/SERVICE DATA
+  - SERVICE: service name or '_all'
+  - DATA - {"action": "ACTION"} or nothing in case of GET request
+    - ACTION - one of [start, stop, restart]
+    
+/file/stats {"file": "FILENAME}
+  - FILENAME - file absolute path
+  
+/process/ID
+  - ID - integer ID
+\end{lstlisting}
