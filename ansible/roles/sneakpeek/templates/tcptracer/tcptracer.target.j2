@@ -1,0 +1,6 @@
+[Unit]
+Description="All tcptracer services"
+Requires={{ tcptracer_services | join(' ') }}
+
+[Install]
+WantedBy=multi-user.target

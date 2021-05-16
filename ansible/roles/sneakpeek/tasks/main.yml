@@ -1,0 +1,36 @@
+---
+
+- name: create sneakpeek script directory
+  file:
+    path: "{{ sneakpeek_scripts_dir }}"
+    state: directory
+
+# the syslog subdir must be writable by syslog
+- name: create sneakpeek syslog base dir
+  file:
+    path: "{{ sneakpeek_log_basepath }}"
+    state: directory
+    group: syslog
+    mode: 0775
+
+- name: setup cron
+  include_tasks: cron.yml
+
+# configure logging for bcc tools
+- name: configure rsyslog for sneakpeek services
+  template:
+    src: logging.conf.j2
+    dest: /etc/rsyslog.d/30-sneakpeek.conf
+  register: rsyslog_config
+
+- name: restart rsyslog
+  when: rsyslog_config.changed
+  systemd:
+    name: rsyslog
+    state: restarted
+
+- name: setup tcptracer
+  include_tasks: tcptracer.yml
+
+- name: setup execsnoop
+  include_tasks: execsnoop.yml

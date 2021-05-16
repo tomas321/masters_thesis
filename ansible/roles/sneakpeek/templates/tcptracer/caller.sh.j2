@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# start tcptracer for a given mount namespace map
+#
+# USAGE: $0 TCPTRACER_MNTNSMAP_OPTION
+#
+
+usage="USAGE: $0 TCPTRACER_MNTNSMAP_OPTION"
+[[ $# -lt 1 ]] && echo -e "error: bad number of args\n$usage" >/dev/stderr && exit 1
+
+mntnsmap="$1"
+
+{{ tcptracer_executable }} {{ tcptracer_cmd_args }} --mntnsmap "$mntnsmap" 2>&1

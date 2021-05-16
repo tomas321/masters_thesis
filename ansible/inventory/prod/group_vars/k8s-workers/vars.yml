@@ -1,19 +1,33 @@
 ---
 
+###
+### sneakpeek variable
+###
+# shared variables
+sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
+sneakpeek_repo_branch: "develop"
+sneakpeek_repo_dest: "/tmp/sneakpeek"
+sneakpeek_command: "./sneakpeek.sh -t fswatch"
+sneakpeek_host: localhost
+
 sneakpeek_log_basepath: "/var/log/sneakpeek"
+sneakpeek_scripts_dir: /usr/local/bin/sneakpeek
+sneakpeek_bpfmap_basepath: /sys/fs/bpf
+sneakpeek_bpfmap_clear_cron_time:
+  minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
+  # hour: '0-23'
+
+# tcptracer variables
+tcptracer_executable: /usr/share/bcc/tools/tcptracer
+tcptracer_cmd_args: "-t"
 
 # execsnoop variables
 execsnoop_executable: /usr/share/bcc/tools/execsnoop
 execsnoop_cmd_args: "-t -T"
-execsnoop_scripts_dir: /usr/local/bin/execsnoop
-execsnoop_bpfmap_basepath: /sys/fs/bpf
-execsnoop_log_basepath: "{{ sneakpeek_log_basepath }}"
 
-# cron related variables
-execsnoop_cron_time:
-  minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
-  # hour: '0-23'
-
+###
+### fswatch
+###
 # fswatch repository variables
 fswatch_repo_url: "https://github.com/tomas321/fswatch"
 fswatch_repo_branch: "develop"
@@ -29,10 +43,3 @@ fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-
 fswatch_scripts_dir: "/usr/local/bin/fswatch"
 fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
 fswatch_log_basepath: "{{ sneakpeek_log_basepath }}"
-
-# sneakpeek variable
-sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
-sneakpeek_repo_branch: "develop"
-sneakpeek_repo_dest: "/tmp/sneakpeek"
-sneakpeek_command: "./sneakpeek.sh -t fswatch"
-sneakpeek_host: localhost

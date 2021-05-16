@@ -1,0 +1,15 @@
+---
+# setup cron for removing old bpfmaps and stopping unused execsnoop/tcptracer services
+
+- name: copy cron script
+  copy:
+    src: cron_remove_old_maps.sh
+    dest: "{{ sneakpeek_bpfmap_clear_cron_script_abspath }}"
+    mode: 0750
+
+- name: ensure the cronjob exists
+  cron:
+    name: "clean sneakpeek bpfmaps"
+    job: "{{ sneakpeek_bpfmap_clear_cron_script_abspath }} 2>&1 | /usr/bin/logger -t {{ sneakpeek_bpfmap_check_tag }}"
+    minute: "{{ sneakpeek_bpfmap_clear_cron_time.minute | default(omit) }}"
+    hour: "{{ sneakpeek_bpfmap_clear_cron_time.hour | default(omit) }}"

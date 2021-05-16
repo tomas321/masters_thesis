@@ -1,0 +1,6 @@
+$template dynamicFile,"{{ sneakpeek_log_basepath }}/%programname%.log"
+
+if $programname == '{{ sneakpeek_bpfmap_check_tag }}' then {{ sneakpeek_log_basepath }}/sneakpeek.log
+else if $programname startswith 'tcptracer' then ?dynamicFile
+else if $programname startswith 'execsnoop' then ?dynamicFile
+& stop

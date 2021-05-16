@@ -1,0 +1,42 @@
+---
+
+- name: create execsnoop systemd service
+  template:
+    src: execsnoop/execsnoop.service.j2
+    dest: /etc/systemd/system/execsnoop@.service
+  register: unit_file
+
+- name: reload systemd daemon
+  when: unit_file.changed
+  systemd:
+    daemon-reload: true
+
+- name: copy execsnoop caller script
+  template:
+    src: execsnoop/caller.sh.j2
+    dest: "{{ execsnoop_caller_script_abspath }}"
+    mode: 0750
+  register: caller_script
+
+# XXX: requires knowing the services beforehand.. not designed in that way yet
+# - name: create execsnoops systemd target
+#   template:
+#     src: execsnoops.target.j2
+#     dest: /etc/systemd/system/execsnoops.target
+
+- name: restart all execsnoop services when systemd template is changed
+  when: "unit_file.changed or caller_script.changed"
+  block:
+    - name: retrieve all execsnoop services
+      shell: >
+        systemctl --type=service --state=active | grep execsnoop.* | awk '{print $1}'
+      register: systemd_services
+
+    - set_fact:
+        execsnoop_services: "{{ execsnoop_services + systemd_services.stdout_lines }}"
+
+    - name: restart all execsnoop services
+      systemd:
+        name: "{{ item | replace('.service', '') }}"
+        state: restarted
+      loop: "{{ execsnoop_services }}"

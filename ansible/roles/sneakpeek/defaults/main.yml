@@ -1,0 +1,18 @@
+---
+# defaults for sneakpeek role
+
+# tcptracer
+tcptracer_executable: /usr/share/bcc/tools/tcptracer
+tcptracer_cmd_args: "-t"
+
+# execsnoop
+execsnoop_executable: /usr/share/bcc/tools/execsnoop
+execsnoop_cmd_args: "-t -T"
+
+# shared variables
+sneakpeek_scripts_dir: /usr/local/bin/sneakpeek
+sneakpeek_log_basepath: /var/log/sneakpeek
+sneakpeek_bpfmap_basepath: /sys/fs/bpf
+sneakpeek_bpfmap_clear_cron_time:
+  minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
+  # hour: '0-23'

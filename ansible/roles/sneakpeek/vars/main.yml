@@ -1,0 +1,14 @@
+---
+# variables for sneakpeek role
+
+# tcptracer
+tcptracer_caller_script_abspath: "{{ sneakpeek_scripts_dir }}/tcptracer_caller.sh"
+tcptracer_services: []
+
+# execsnoop
+execsnoop_caller_script_abspath: "{{ sneakpeek_scripts_dir }}/execsnoop_caller.sh"
+execsnoop_services: []
+
+# shared
+sneakpeek_bpfmap_clear_cron_script_abspath: "{{ sneakpeek_scripts_dir }}/cron_remove_old_maps.sh"
+sneakpeek_bpfmap_check_tag: 'bpfmap_cron_check'

@@ -1,0 +1,11 @@
+[Unit]
+Description="tcptracer container %I"
+#PartOf=tcptracers.target
+
+[Service]
+Restart=no
+ExecStop=/bin/kill -9 $MAINPID
+ExecStart={{ tcptracer_caller_script_abspath }} {{ sneakpeek_bpfmap_basepath | regex_replace('\\/$', '') }}/%i 2>&1
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tcptracer_%i

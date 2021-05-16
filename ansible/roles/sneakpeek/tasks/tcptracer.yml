@@ -1,0 +1,42 @@
+---
+
+- name: create tcptracer systemd service
+  template:
+    src: tcptracer/tcptracer.service.j2
+    dest: /etc/systemd/system/tcptracer@.service
+  register: unit_file
+
+- name: reload systemd daemon
+  when: unit_file.changed
+  systemd:
+    daemon-reload: true
+
+- name: copy tcptracer caller script
+  template:
+    src: tcptracer/caller.sh.j2
+    dest: "{{ tcptracer_caller_script_abspath }}"
+    mode: 0750
+  register: caller_script
+
+# XXX: requires knowing the services beforehand.. not designed in that way yet
+# - name: create tcptracers systemd target
+#   template:
+#     src: tcptracers.target.j2
+#     dest: /etc/systemd/system/tcptracers.target
+
+- name: restart all tcptracer services when systemd template is changed
+  when: "unit_file.changed or caller_script.changed"
+  block:
+    - name: retrieve all tcptracer services
+      shell: >
+        systemctl --type=service --state=active | grep tcptracer.* | awk '{print $1}'
+      register: systemd_services
+
+    - set_fact:
+        tcptracer_services: "{{ tcptracer_services + systemd_services.stdout_lines }}"
+
+    - name: restart all tcptracer services
+      systemd:
+        name: "{{ item | replace('.service', '') }}"
+        state: restarted
+      loop: "{{ tcptracer_services }}"
