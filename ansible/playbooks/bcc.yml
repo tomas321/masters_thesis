@@ -1,6 +1,6 @@
 ---
 
-- hosts: k8s-cluster
+- hosts: k8s-workers
   name: install bpftool for current kernel
   become: true
   tasks:
@@ -11,7 +11,7 @@
         - linux-tools-common
         - "linux-tools-{{ ansible_kernel }}"
 
-- hosts: k8s-cluster
+- hosts: k8s-workers
   name: install BCC from source
   become: true
   roles:

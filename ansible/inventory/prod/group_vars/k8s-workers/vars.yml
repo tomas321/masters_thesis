@@ -43,3 +43,14 @@ fswatch_cmd_args: '--ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-
 fswatch_scripts_dir: "/usr/local/bin/fswatch"
 fswatch_caller_script_abspath: "{{ fswatch_scripts_dir }}/fswatch_caller.sh"
 fswatch_log_basepath: "{{ sneakpeek_log_basepath }}"
+
+###
+### bcc
+###
+bcc_repo:
+  url: "https://github.com/tomas321/bcc"
+  version: fix/proper-tcptracer-print-function
+  dest: /opt/bcc
+# old working version
+# bcc_repo:
+#   version: 'v0.19.0'
