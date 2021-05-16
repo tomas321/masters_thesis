@@ -22,11 +22,17 @@
 % Title page
 \include{preamble/title}
 
-% Annotation
-\include{preamble/annotation}
+% Assignment
+\include{preamble/assignment}
+
+% Declaration
+\include{preamble/declaration}
 
 % Acknowledgements
-% \include{preamble/acknowledgements}
+\include{preamble/acknowledgements}
+
+% Annotation
+\include{preamble/annotation}
 
 % Table of contents
 \tableofcontents{}
@@ -38,7 +44,6 @@
 
 % References segment
 \begin{refsegment}
-\pagenumbering{arabic}
 % Introduction
 %\clearpage\null
 \input{content/intro}
@@ -75,6 +80,7 @@
 
 % Appendix
 \appendix
+\addtocontents{toc}{\cftpagenumbersoff{chapter}}
 
 %\clearpage\null
 \include{appendices/ansible}

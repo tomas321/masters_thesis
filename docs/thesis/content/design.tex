@@ -170,8 +170,7 @@ Detecting executed processes is a more sofisticated issue, but using the right t
 Last of the event types - network traffic monitoring is much more intuitive and native to the architecture and technology used. Since the applications within the cluster are virtualized, the pod network interfaces can be traced to host accessible interfaces. Consequently, a tool taps on to the interface and effectively scans the whole traffic including a pod-to-pod and pod-to-external communications. This leaves open possibilities to tools like \textit{DPDK}, python \textit{scapy}, \textit{libpcap} library or netflow collectors like \textit{suricata}. Alternatively, monitoring of active TCP connection could be sufficient for deterministic network activity e.g. the BCC \textit{tcptracer} tool. Although the design expects many pods with many interfaces, so the network traffic collector should have a minimal overhead.
 
 \subsubsection*{Control tool \label{design:mon:tools:main}}
-% TODO: in text
-The main control (\textit{API server}) tool is for managing and controlling all of the above mentioned tools and functionality. It is a centralized API server, which has access to the execsnoop, fswatch and nettool (\textbf{TODO change}) for basic management. Additionally, API server provides additional threat hunting functionality such as:
+The main control (\textit{API server}) tool is for managing and controlling all of the above mentioned tools and functionality. It is a centralized API server, which has access to the execsnoop, fswatch and tcptracer for basic management. Additionally, API server provides additional threat hunting functionality such as:
 \begin{itemize}[noitemsep]
 	\item Running process information.
 	\item File statistics.

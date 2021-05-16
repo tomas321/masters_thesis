@@ -4,7 +4,7 @@
 │   └── prod
 ├── playbooks
 │   ├── bcc.yml
-│   ├── execsnoop.yml
+│   ├── sneakpeek.yml
 │   ├── files
 │   │   └── .ssh
 │   │       ├── id_vagrant_k8s
@@ -25,10 +25,9 @@
     ├── ansible-openvswitch
     ├── ansible-role-latex
     ├── bcc
-    ├── execsnoop
+    ├── sneakpeek
     ├── fswatch
     ├── metallb
     ├── nfs
     └── sneakctl
         └── server
-

@@ -11,21 +11,21 @@
 
 % SETTINGS - NAMES
 \newcommand{\myTitle}[0] {Bait network based monitoring of malicious actors}
-\newcommand{\myName}[0] {Tomáš Belluš}
+\newcommand{\myName}[0] {Bc. Tomáš Belluš}
 \newcommand{\mySupervisor}[0] {Ing. Tibor Csóka, PhD.}
 \newcommand{\myDepartSupervisor}[0] {Ing. Katarína Jelemenská, PhD.}
-\newcommand{\myEvidenceNumber}[0] {FIIT-XXXXXX-82385}
-\newcommand{\myDate}[0] {2021, January}
+\newcommand{\myEvidenceNumber}[0] {FIIT-183739-82385}
+\newcommand{\myDate}[0] {May 2021}
 \newcommand{\myStudyProgram}[0] {Information Security}
-\newcommand{\myStudyField}[0] {9.2.4 Computer Engineering}
+\newcommand{\myStudyField}[0] {Computer Science}
 \newcommand{\myInstitude}[0] {Institute of Computer Engineering and Applied Informatics}
 
 \newcommand{\mojNazov}[0] {Sledovanie zlovoľných činiteľov nástražným systémom}
-\newcommand{\mojeMeno}[0] {Tomáš Belluš}
+\newcommand{\mojeMeno}[0] {Bc. Tomáš Belluš}
 \newcommand{\mojVeduci}[0] {Ing. Tibor Csóka, PhD.}
 \newcommand{\mojPedagogVeduci}[0] {Ing. Katarína Jelemenská, PhD.}
-\newcommand{\mojeEID}[0] {FIIT-XXXXXX-82385}
-\newcommand{\mojDatum}[0] {Január 2021}
+\newcommand{\mojeEID}[0] {FIIT-183739-82385}
+\newcommand{\mojDatum}[0] {Máj 2021}
 \newcommand{\mojStudProgram}[0] {Informačná bezpečnosť}
 \newcommand{\mojStudOdbor}[0] {9.2.4 Počítačové Inžinierstvo}
 \newcommand{\mojUstav}[0] {Ústav počítačového inžinierstva a aplikovanej informatiky}
@@ -37,6 +37,7 @@
 \usepackage{float}
 \usepackage{longtable}
 \usepackage{setspace}
+\usepackage{pdfpages}
 
 % Spacing
 \setstretch{\mySpacing}
@@ -131,3 +132,10 @@
 	breaklines=true,
 }
 \lstset{style=codestyle}
+
+\usepackage{tocloft}
+\newcommand{\appendixpagenumbering}{
+	\break
+	\pagenumbering{arabic}
+	\renewcommand{\thepage}{\thechapter-\arabic{page}}
+}
