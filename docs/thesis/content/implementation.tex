@@ -165,6 +165,47 @@ It introduces a faster way of management and additional look at process instance
 This is particularly useful, because the live monitoring data are in a stream of log lines with basic information. It safes time, which is in live system compromisation crucial.
 
 \section{Proof of concept - experiment \label{implementation:poc}}
+The experiment consists of demonstrating the introduced monitoring tools. The set environment comprises of a single custom container vulnerable to the \textit{shellshock} attack. With all the monitoring tools enabled the container is accessed via over SSH exploiting the shellshock vulnerability (see~\autoref{image:poc:exploit}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.44]{shellshock_exploit}
+	\caption{The 'shellshockable' container is running within Kubernetes. It's published via a \textit{LoadBalancer} Service mapping the SSH port to port \textit{TCP/2222}. The IP is dynamically assinged from an address pool to \texttt{172.30.0.104}.}
+	\label{image:poc:exploit}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.44]{shellshock_shell}
+	\caption{Shell commands executed. All are then visible in the below listed screen shots}
+	\label{image:poc:shell}
+\end{figure}
+
+\autoref{image:poc:shell} displays the commands executed in the non-interactive shell, which means that all input/output text is as if part of a single stream. At one point the actor downloads a file from the Internet (\texttt{sme.sk} in the example) saving it to \texttt{index.html}. In \autoref{image:poc:execsnoop}, \autoref{image:poc:tcptracer} and \autoref{image:poc:fswatch} all these executed commands are seen from a different perspective.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.3]{poc_execsnoop}
+	\caption{}
+	\label{image:poc:execsnoop}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.3]{poc_tcptracer}
+	\caption{}
+	\label{image:poc:tcptracer}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.4]{poc_fswatch}
+	\caption{To fit into the page the added \texttt{PATH} can be replaced by \texttt{/var/lib/docker/overlay2/LONG\_ID/merged}.}
+	\label{image:poc:fswatch}
+\end{figure}
+
+Overall, all processes executed, files created and connections made are documented and it creates an image of the attacker's agenda. Even though this is only a proof of concept, in case of a more complex attack the usability is the same.
+
 %- network traffic is monitored by tapping to the mapped interface on the host system
 %1. get the docker container pid
 %2. us nsenter to execute 'ip addr' to get the main net interface
