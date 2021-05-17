@@ -36,9 +36,13 @@
         path: "{{ vagrant_k8s.dir }}/environment.rb"
         create: true
         block: |
+          K8S_BOX_DISTRO = "{{ vagrant_box_distro }}"
+          K8S_MASTER_NODE_COUNT = "{{ k8s_nodes.master_count }}"
+          K8S_WORKER_NODE_COUNT = "{{ k8s_nodes.worker_count }}"
+          K8S_DATA_NODE_COUNT = "{{ k8s_nodes.data_count }}"
           K8S_NETWORK_BRIDGE_NAME = "{{ vagrant_vms_bridge.name }}"
           K8S_NODES_NET_PREFIX = "{{ vagrant_vms_bridge.ip.split('.')[:-1] | join('.') }}."
-          K8S_DOMAIN = "{{ k8s_nodes_domain }}"
+          K8S_DOMAIN = "{{ k8s_nodes.domain }}"
           K8S_SSH_PUBLIC_KEY_PATH = "{{ (__ssh_keys.results[0].item.key == 'public') | ternary(__ssh_keys.results[0].dest, __ssh_keys.results[1].dest) | replace(ansible_env.HOME, '~') }}"
   roles:
     - role: ansible-config-interfaces

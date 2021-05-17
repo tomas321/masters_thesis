@@ -19,4 +19,10 @@ vagrant_ssh_key:
   private: ".ssh/id_vagrant_k8s"
   public: ".ssh/id_vagrant_k8s.pub"
 
-k8s_nodes_domain: k8s-host.local
+vagrant_box_distro: 'generic/ubuntu1804'
+
+k8s_nodes:
+  domain: k8s-host.local
+  master_count: 1
+  worker_count: 2
+  data_count: 1
