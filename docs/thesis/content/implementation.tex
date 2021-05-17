@@ -99,9 +99,9 @@ fswatch --ex-event=IsSymLink --ex-event=IsDir --ex-event=IsFile --ex-event=Platf
 \subsubsection*{Execsnoop \label{implementation:mon:hunting:execsnoop}}
 % explain the usage and the creation of the bpf map
 % maybe not mention its from the official docs
-Each execsnoop instance is operating in a specified mount namespace shared over a BPF map. This is ensured by the \texttt{bpftool} backed by the latest kernel. \autoref{listing:bpftool:snippet} is a \texttt{bpftool\_map\_container\_ns.sh} script snippet for creating the BPF map (mapped to a specific file typically in \textit{/sys/fs/bpf} directory) if not present already and updates it with a the mount namespace. Additionally, it starts the templated execsnoop systemd services.
+Each execsnoop instance is operating in a specified mount namespace shared over a BPF map. This is ensured by the \texttt{bpftool} backed by the latest kernel. \autoref{listing:bpftool:snippet} is a \texttt{bpftool\_map\_container\_ns.sh} script snippet for creating the BPF map (mapped to a specific file typically in \textit{/sys/fs/bpf} directory) if not present already and updates it with a the mount namespace. Additionally, it starts the templated (see~\autoref{listing:systemd:execsnoop}) execsnoop systemd services.
 
-\begin{lstlisting}[language=bash, style=custom, caption={Setup of BPF map for sharing the mount namespave with execsnoop instance. INODE variable is retrieved using the command sequence specified in \autoref{listing:sneakpeek:mntns}}, label=listing:bpftool:snippet]
+\begin{lstlisting}[language=bash, style=custom, caption={Setup of BPF map for sharing the mount namespave with execsnoop instance. INODE variable is retrieved using the command sequence specified in \autoref{listing:sneakpeek:mntns}.}, label=listing:bpftool:snippet]
 FILE=/sys/fs/bpf/mnt_ns_container1
 NAME="${FILE##*/}"
 NS_ID_HEX="$(printf '%016x' $INODE | sed 's/.\{2\}/&\n/g' | tac | tr '\n' ' ')"
@@ -124,6 +124,19 @@ fi
 sudo bpftool map update pinned $FILE key hex $NS_ID_HEX value hex 00 00 00 00 any
 \end{lstlisting}
 
+\begin{lstlisting}[language=Clean, style=custom, caption={Execsnoop templated systemd unit file. It executes a caller script running the execsnoop program. Program output is redirected to the local syslog server and in a custom configuration the stream is writen to file based on the "SyslogIdentifier".}, label=listing:systemd:execsnoop]
+[Unit]
+Description="execsnoop container %I"
+
+[Service]
+Restart=no
+ExecStop=/bin/kill -9 $MAINPID
+ExecStart=/usr/local/bin/sneakpeek/execsnoop_caller.sh /sys/fs/bpf/%i
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=execsnoop_%i
+\end{lstlisting}
+
 \subsubsection*{Tcptracer \label{implementation:mon:hunting:tcptracer}}
 A stateful tool capturing changes in TCP connections made to and from the target system. Namely the accept, close and connect operations. It's differentiating containers by the mount namespace utilizing the same technique (see~\autoref{listing:bpftool:snippet}) as execsnoop. \autoref{image:implementation:tcptracer} shows the example output, how it copes with displaying the active connections. The down side is that it's difficult to trace the connection when analyzing the output.
 
@@ -134,7 +147,7 @@ A stateful tool capturing changes in TCP connections made to and from the target
 	\label{image:implementation:tcptracer}
 \end{figure}
 
-Each tcptracer process is started by a caller script, which in term is managed by systemd. A caller script has the advantage of high flexibility in case of pre-execution operations.
+Each tcptracer process is started by a caller script, which in term is managed by systemd. A caller script has the advantage of high flexibility in case of pre-execution operations. Regarding systemd, tcptracer failed to log its output in the same way as for execsnoop specified in \autoref{listing:systemd:execsnoop}. A proposed and realized fix\footnote{Refer to the forked repository proposing this change - \url{https://github.com/tomas321/bcc/tree/fix/proper-tcptracer-print-function}} was to copy the same printing strategy from execsnoop.
 
 \subsubsection*{Deployment \label{implementation:mon:hunting:deploy}}
 Fswatch, tcptracer and execsnoop are deployed and configured using the combination of \texttt{sneakpeek.sh} script and Ansible playbooks.
@@ -142,7 +155,7 @@ Fswatch, tcptracer and execsnoop are deployed and configured using the combinati
 	\item \texttt{fswatch.yml} - Fully configures all nodes with fswatch by runnig the \texttt{sneakpeek.sh} script and ultimately starting systemd services for each container.
 	\item \texttt{sneakpeek.yml} - Similarly, completely configures the nodes with process monitoring running execsnoop and network connection monitoring running tcptracer as systemd services.
 \end{itemize}
-All are logging their according the \ref{iso.12.4}. The attackers agenda can be identified by inspecting the logged information in the designated location - \textit{/var/log/sneakpeek}. 
+All are logging their according the \ref{iso.12.4}. The attackers agenda can be identified by inspecting the logged information in the designated location - \textit{/var/log/sneakpeek}.
 
 \subsubsection*{Management \label{implementation:mon:hunting:mgmt}}
 To have control over the monitoring services running on each node, additionally the \textit{sneakctl\_server}\footnote{\url{https://github.com/tomas321/sneakctl_server/}} provides some management related features. It is implemented as a Flask REST API in abidance with \ref{iso.12.5} serving an additional access to the systemd services on nodes and increased increased visibility of processes and files on each container. Concretely, there are four main endpoint groups - process, fswatch, execsnoop and file (see~\autoref{appendix:sneakctl}).
