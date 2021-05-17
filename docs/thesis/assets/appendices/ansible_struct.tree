@@ -22,8 +22,6 @@
 └── roles
     ├── ansible-config-interfaces
     ├── ansible-kvm
-    ├── ansible-openvswitch
-    ├── ansible-role-latex
     ├── bcc
     ├── sneakpeek
     ├── fswatch

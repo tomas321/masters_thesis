@@ -42,7 +42,7 @@ The section discusses thesis related virtualization technologies kernel virtual 
 
 \subsection{Kernel-based Virtual Machine \label{anal:virtual:kvm}}
 % TODO: why KVM and libvirt. KVM is a type-1 (bare-metal) hypervisor technology which enables VMs to exist in the host system. libvirt is the API daemon for VM configuration and specification
-KVM is a type-1 (bare-metal) hypervisor enabling technology used for virtualization of full operating systems. The core functionality is based on the kernel capabilities to manage the hardware resource, hence the name \textbf{Kernel-based} VM \cite{redhat:kvm}. KVM is native to the Linux as a kernel module, which requires the host machine processor virtualization support and by utilizing them, multiple VMs may coexist on one machine \cite{article:kvm_qemu}.
+KVM is a type-1 (bare-metal) hypervisor enabling technology used for virtualization of full operating systems. The core functionality is based on the kernel capabilities to manage the hardware resource, hence the name "Kernel-based" VM \cite{redhat:kvm}. KVM is native to the Linux as a kernel module, which requires the host machine processor virtualization support and by utilizing them, multiple VMs may coexist on one machine \cite{article:kvm_qemu}.
 
 \subsubsection*{KVM, QEMU and Libvirt \label{anal:virtual:kvm:combined}}
 

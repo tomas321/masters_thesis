@@ -45,17 +45,17 @@ Before implementation, the whole solution including program code, configurations
 \subsection{Base system \label{design:env-arch:base}}
 The lowest layer is an Ubuntu host machine with KVM virtual machines (VM). Deriving from a Kubernetes cluster design in production environment, which often isn't a single-node architecture, the base system must be a set of coexisting VMs. Choosing the right number of VMs with respect to the overall resource capacity is not in scope of this thesis. Nevertheless, there are three base VMs serving as the base of the deceiving system.
 
-The main specification defines that all VMs are identical and configured for remote operations, have functional inter-VM communication and meet all requirements (e.g. kernel version, basic security settings, hardening). Creating multiple identical VMs can be achieved by preceding mechanisms (e.g. \textit{cloud-init}\footnote{https://github.com/canonical/cloud-init}), sharing the same image or by provisioning mechanisms (e.g. \textit{Vagrant}, \textit{Ansible}).
+The main specification defines that all VMs are identical and configured for remote operations, have functional inter-VM communication and meet all requirements (e.g. kernel version, basic security settings, hardening). Creating multiple identical VMs can be achieved by preceding mechanisms (e.g. \textit{cloud-init}\footnote{\url{https://github.com/canonical/cloud-init}}), sharing the same image or by provisioning mechanisms (e.g. \textit{Vagrant}, \textit{Ansible}).
 
 It depends on the implementation, but since these VMs have a static and simple setup, preceding is not necessary. This technique is fully configurable and must be automated or manually ran for each VM with deviating variables e.g. host name, IP address. This is not a complicated process, but a more suitable approach is using a shared pre-configured image combined with a dedicated tool - Vagrant for seamless provisioning and installation. KVM with libvirt and Vagrant create a "VM as code" concept efficient in provisioning, preceding and whole VM management.
 
 \subsubsection*{Setup \label{design:env-arch:base:setup}}
-Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mention in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster. Both of these networks are represented as Linux network bridges and are segregated to comply with \ref{iso.13.1}.
+Base system has several dependencies and requires a custom setup of networking and host machine altogether. As mentioned in \autoref{design:specs}, the host depends on QEMU, KVM and libvirt to run VMs. Additionally, the VMs are connected to a libvirt-managed management network (MGMT network) and a standard inter-VM network (NODE network) also simulating public IP address pool for the Kubernetes cluster (see~\autoref{image:design:base_system}). Both of these networks are represented as Linux network bridges and are segregated to comply with \ref{iso.13.1}.
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=0.4]{base_system_design}
-	\caption{Base system visualization. !!!!REVIEW ME!!!!}
+	\caption{Base system visualization.}
 	\label{image:design:base_system}
 \end{figure}
 
@@ -126,7 +126,7 @@ Monitoring a container requires to observe container file system, networking and
 	\item 
 	Points of enter, such as honeypots that lure the threat actors to the environment. Could be local to the environment or remote anywhere in the Internet.
 	\item 
-	3 Ubuntu server nodes are the base to Kubernetes cluster holding and orchestrating the whole environment.
+	Three Ubuntu server nodes are the base to Kubernetes cluster holding and orchestrating the whole environment.
 	\item 
 	There are to be multiple environments.
 	\item

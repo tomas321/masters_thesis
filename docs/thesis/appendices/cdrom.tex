@@ -2,13 +2,22 @@
 \setcounter{listing}{0}
 \appendixpagenumbering
 
-\chapter{Contents of Included archive \label{appendix:contents} }
+\chapter{Contents of included archive \label{appendix:contents} }
 
-Archive included to the thesis contains following files:
+ZIP archive included to this thesis contains following files:
 
 \begin{itemize}[noitemsep]
-\item \texttt{/file1} --- First file
-\item \texttt{/file2} --- Second file
+\item \texttt{/bcc} --- Forked git repository, including the \texttt{.git} directory.
+\item \texttt{/fswatch} --- Forked git repository, including the \texttt{.git} directory.
+\item \texttt{/k8s-environment-scenarios} --- Kubernetes environment resource combinations. Mainly the \texttt{/scenarios/private\_scenario}.
+\item \texttt{/masters\_thesis} --- Main thesis repository.
+\begin{itemize}
+	\item \texttt{/ansible} --- Full ansible skeleton.
+	\item \texttt{/provisioner/vagrant/Vagrantfile} --- Vagrant VM provisioning file.
+	\item \texttt{/kubespray-inventory} --- Ansible inventory generated according the official kubespray documentation.
+\end{itemize}
+\item \texttt{sneakctl\_server} --- Python API server program.
+\item \texttt{sneakpeek} --- Set of scripts for intermediate setups.
 \end{itemize}
 
 %Digitálna časť práce má veľkosť XX.XX GB, kvôli čomu je uložená v systéme G Suite for Education.
