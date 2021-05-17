@@ -46,8 +46,7 @@ For ansible playbooks documentation refer to the dedicated [README.md](./ansible
     - `git clone https://github.com/tomas321/masters_thesis`
 
 2. Setup a ssh key pair for accessing the nodes.
-    - `ssh-keygen -t rsa -N <your_passphrase> -f ~/.ssh/id_vagrant_k8s` - generate simple key pair
-        - in case you like to chnage some parameters, you may except the output file `-f` option
+    - `ssh-keygen -t rsa -N <your_passphrase> -f ansible/playbooks/files/.ssh/id_vagrant_k8s` - generate simple key pair
 
 3. Run the Ansible [setup kvm playbook](./ansible/playbooks/setup_kvm.yml) as root.
     - ```bash
@@ -58,6 +57,7 @@ For ansible playbooks documentation refer to the dedicated [README.md](./ansible
 4. Run the Ansible [vagrant k8s up playbook](./ansible/playbooks/vagrant_k8s_kvm.yml) as root.
     - ```ansible-playbook -K -i inventory/prod/hosts playbooks/vagrant_k8s_up.yml```
 
-5. Configure routing to/from the VMs (future k8s nodes) e.g. using ['routing to VM script'](./scripts/add_route_to_env.sh), ['routing from VM script'](./scripts/setup_vms/routing_setup.sh) in case it's a local lab
+5. Configure routing to/from the VMs (future k8s nodes) e.g. using [routing to VM script](./scripts/add_route_to_env.sh), [routing from VM script](./scripts/setup_vms/routing_setup.sh) in case it's a local lab
 6. Setup **k8s cluster** on the created nodes. I prefer [kubespray](https://kubespray.io/#/), but there are other options.
 7. (optional) Install `kubectl` on the host machine ([official](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [playbook](./ansible/playbooks/kubectl.yml))
+8. (optional) setup other thesis related tools using Ansible. Refer to the [playbooks README](./ansible/README.md)
