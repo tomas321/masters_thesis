@@ -18,6 +18,23 @@
     mode: 0750
   register: caller_script
 
+- name: clone sneakpeek to ansible host
+  become: false
+  delegate_to: "{{ sneakpeek_host }}"
+  run_once: true
+  git:
+    repo: "{{ sneakpeek_repo_url }}"
+    version: "{{ sneakpeek_repo_branch }}"
+    dest: "{{ sneakpeek_repo_dest }}"
+
+- name: run sneakpeek
+  become: false
+  delegate_to: "{{ sneakpeek_host }}"
+  run_once: true
+  command: "{{ sneakpeek_execsnoop_command }}"
+  args:
+    chdir: "{{ sneakpeek_repo_dest }}"
+
 # XXX: requires knowing the services beforehand.. not designed in that way yet
 # - name: create execsnoops systemd target
 #   template:

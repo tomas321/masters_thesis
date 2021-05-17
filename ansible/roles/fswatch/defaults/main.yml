@@ -20,5 +20,5 @@ fswatch_log_basepath: "/var/log/fswatch"
 sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
 sneakpeek_repo_branch: "master"
 sneakpeek_repo_dest: "/tmp/sneakpeek"
-sneakpeek_command: "./sneakpeek.sh -t fswatch"
+sneakpeek_fswatch_command: "./sneakpeek.sh -t fswatch"
 sneakpeek_host: localhost

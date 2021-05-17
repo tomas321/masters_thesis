@@ -16,7 +16,7 @@
   become: false
   delegate_to: "{{ sneakpeek_host }}"
   run_once: true
-  command: "{{ sneakpeek_command }}"
+  command: "{{ sneakpeek_fswatch_command }}"
   args:
     chdir: "{{ sneakpeek_repo_dest }}"
 

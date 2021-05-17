@@ -16,3 +16,10 @@ sneakpeek_bpfmap_basepath: /sys/fs/bpf
 sneakpeek_bpfmap_clear_cron_time:
   minute: '0,10,20,30,40,50'  # defaults to 0-59 when omitted
   # hour: '0-23'
+
+sneakpeek_repo_url: "https://github.com/tomas321/sneakpeek"
+sneakpeek_repo_branch: "master"
+sneakpeek_repo_dest: "/tmp/sneakpeek"
+sneakpeek_execsnoop_command: "./sneakpeek.sh -t procmon"
+sneakpeek_tcptracer_command: "./sneakpeek.sh -t tcptracer"
+sneakpeek_host: localhost
