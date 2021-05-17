@@ -1,6 +1,0 @@
----
-
-- hosts: k8s-cluster
-  become: true
-  roles:
-    - role: execsnoop
