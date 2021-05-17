@@ -11,6 +11,8 @@
 \documentclass[\myFontSize,a4paper,twoside,openright,english]{book}
 \include{preamble/preamble}
 
+\graphicspath{ {./assets/images/} }
+
 \begin{document}
 
 % Minted
@@ -20,11 +22,17 @@
 % Title page
 \include{preamble/title}
 
-% Annotation
-\include{preamble/annotation}
+% Assignment
+\include{preamble/assignment}
+
+% Declaration
+\include{preamble/declaration}
 
 % Acknowledgements
-% \include{preamble/acknowledgements}
+\include{preamble/acknowledgements}
+
+% Annotation
+\include{preamble/annotation}
 
 % Table of contents
 \tableofcontents{}
@@ -36,48 +44,56 @@
 
 % References segment
 \begin{refsegment}
-
 % Introduction
-% \clearpage\null
-% \input{content/intro}
+%\clearpage\null
+\input{content/intro}
 
 % Chapter 1
-\clearpage\null
+%\clearpage\null
 \input{content/chapter1}
 
 % Related Work
-\clearpage\null
+%\clearpage\null
 \input{content/related}
 
 % Design
-\clearpage\null
+%\clearpage\null
 \input{content/design}
 
 % implementation
-\clearpage\null
+%\clearpage\null
 \input{content/implementation}
 
 % Conclusion
 % \clearpage\null
-% \input{content/conclusion}
+\input{content/conclusion}
 
 % Resume
 % \clearpage\null
-% \input{content/resume}
+\input{content/resume}
 
 % Bibliography
-\clearpage\null
+%\clearpage\null
 \printbibliography[heading=references,segment=\therefsegment,resetnumbers=true]
 
 \end{refsegment}
 
 % Appendix
-% \appendix
+\appendix
+\addtocontents{toc}{\cftpagenumbersoff{chapter}}
 
-% \clearpage\null
-% \include{appendices/appendix1}
+%\clearpage\null
+\include{appendices/ansible}
 
-% \clearpage\null
-% \include{appendices/cdrom}
+%\clearpage\null
+\include{appendices/vagrant}
+
+%\clearpage\null
+\include{appendices/sneakctl}
+
+\include{appendices/guide}
+
+%\clearpage\null
+\include{appendices/cdrom}
 
 \end{document}

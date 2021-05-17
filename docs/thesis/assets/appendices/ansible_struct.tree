@@ -1,0 +1,33 @@
+├── hosts
+├── inventory
+│   ├── dev
+│   └── prod
+├── playbooks
+│   ├── bcc.yml
+│   ├── sneakpeek.yml
+│   ├── files
+│   │   └── .ssh
+│   │       ├── id_vagrant_k8s
+│   │       └── id_vagrant_k8s.pub
+│   ├── fswatch.yml
+│   ├── kubectl.yml
+│   ├── metallb.yml
+│   ├── nfs_delete_objects.yml
+│   ├── nfs.yml
+│   ├── prometheus.yml
+│   ├── setup_kvm.yml
+│   ├── sneakctl_server.yml
+│   ├── vagrant_k8s_down.yml
+│   └── vagrant_k8s_up.yml
+└── roles
+    ├── ansible-config-interfaces
+    ├── ansible-kvm
+    ├── ansible-openvswitch
+    ├── ansible-role-latex
+    ├── bcc
+    ├── sneakpeek
+    ├── fswatch
+    ├── metallb
+    ├── nfs
+    └── sneakctl
+        └── server

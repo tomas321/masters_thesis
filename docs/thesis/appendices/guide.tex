@@ -1,0 +1,78 @@
+\setcounter{figure}{0}
+\setcounter{listing}{0}
+\appendixpagenumbering
+
+\chapter{Setup guide \label{appendix:guide}}
+This appendix goes step by step through setting up the whole solution.
+
+\section{Environment \label{appendix:guide:env}}
+A prerequisite is running it on a Linux machine with Ansible pre-installed using \texttt{pip3 install ansible}, which acquires the latest version in comparison with system package manager. The \textit{vagrant\_k8s\_up.yml} playbook, 
+
+Before running, consider:
+\begin{itemize}[noitemsep]
+	\item The script generates a new SSH key pair.
+	\item All variables are in the \texttt{inventory/prod/group\_vars/} directory.
+	\item \autoref{listing:appendix:guide:first} goes through almost all installation processes \textbf{except} the monitoring tools setup described in \autoref{listing:appendix:guide:second}
+\end{itemize}
+\begin{lstlisting}[language=bash, style=custom, caption={Full installation procedure without the final setup of the monitoring tools}, label=listing:appendix:guide:first]
+#!/bin/bash
+basedir="~/honeynet"
+ansible_dir="$basedir/masters_thesis/ansible"
+kubespray_dir="$basedir/kubespray"
+
+pushd  $basedir
+git clone https://github.com/tomas321/masters_thesis
+git clone https://github.com/kubespray/kubespray
+
+cd $ansible_dir
+# ssh key setup. comment this line if you are using your
+# custom key, in which case copy to keys to the same directory
+# using the same name, otherwise change the variable in the 
+# inventory group vars
+ssh-keygen -N masterthesis -b 2048 -t rsa -C "password is 'masterthesis'" -f playbooks/files/.ssh/id_vagrant_k8s >/dev/null
+
+# Base system virtual machine setup
+ansible-playbook playbooks/setup_kvm.yml
+ansible-playbook playbooks/vagrant_k8s_up.yml
+
+cd $kubespray
+# configure kubespray
+sudo pip3 install -r requirements.txt
+# copy inventory with 172.30.0.0/24 node IPs and helm enabled
+cp -rfp $ansible_dir/kubespray-inventory inventory/prod-cluster
+ansible-playbook -i inventory/prod-cluster/hosts.yaml  --become --become-user=root cluster.yml
+
+cd $ansible_dir
+# install sneakpeek dependencies
+ansible-playbook playbooks/kubectl.yml -l localhost
+ansible-playbook playbooks/nfs.yml
+# install and setup kubernetes relations
+ansible-playbook playbooks/metallb.yml
+ansible-playbook playbooks/prometheus.yml
+
+# CONTINUE ON THE NEXT LISTING
+\end{lstlisting}
+
+\section{Monitoring tools}
+\autoref{listing:appendix:guide:second} follows the actions required to deploy the BCC tools, fswatch and sneakpeek scripts. It's a continuation of the previous \autoref{listing:appendix:guide:first}.
+
+\begin{lstlisting}[language=bash, style=custom, caption={Monitoring tools installation and setup including sneakpeek, fswatch, sneakctl\_server, bcc tools and kernel prerequisite.}, label=listing:appendix:guide:second]
+# CONTINUE FROM THE NEXT LISTING
+
+# the bcc playbook requires the "latest" kernel
+cd $ansible_dir
+ansible -m apt -a "update_cache=true name=linux-generic-hwe-18.04" -i inventory/prod/hosts k8s-cluster
+ansible-playbook playbooks/vagrant_k8s_down.yml
+ansible-playbook playbooks/vagrant_k8s_up.yml
+
+# finally setup bcc
+ansible-playbook playbooks/bcc.yml
+
+# install and setup sneakpeek monitoring tools
+ansible-playbook playbooks/sneakctl_server.yml
+ansible-playbook playbooks/sneakpeek.yml
+ansible-playbook playbooks/fswatch.yml
+
+# DONE
+cd $basedir && popd && exit 0
+\end{lstlisting}

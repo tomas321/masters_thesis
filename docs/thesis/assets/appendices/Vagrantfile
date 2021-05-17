@@ -1,0 +1,17 @@
+def create_node(config, prefix, i, ip)
+    short_prefix = prefix[0]
+    config.vm.define "#{prefix}-#{i}" do |node|
+        node.vm.hostname = "#{short_prefix}#{i}.#{$k8s_domain}"
+        node.vm.network :public_network,
+            :dev => $network_bridge,
+            :mode => "bridge",
+            :type => "bridge",
+            :ip => ip
+        node.vm.post_up_message = "#{prefix} #{i} started"
+        node.vm.provision "file", source: $public_key_path, destination: "~/.ssh/id_k8s_host.pub"
+        node.vm.provision "shell", inline: "cat /home/vagrant/.ssh/id_k8s_host.pub >> /home/vagrant/.ssh/authorized_keys"
+        # node.vm.provider :libvirt do |libvirt|
+        #     libvirt.memory = 2048
+        # end
+    end
+end
