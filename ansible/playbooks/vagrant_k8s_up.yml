@@ -37,9 +37,9 @@
         create: true
         block: |
           K8S_BOX_DISTRO = "{{ vagrant_box_distro }}"
-          K8S_MASTER_NODE_COUNT = "{{ k8s_nodes.master_count }}"
-          K8S_WORKER_NODE_COUNT = "{{ k8s_nodes.worker_count }}"
-          K8S_DATA_NODE_COUNT = "{{ k8s_nodes.data_count }}"
+          K8S_MASTER_NODE_COUNT = {{ k8s_nodes.master_count }}
+          K8S_WORKER_NODE_COUNT = {{ k8s_nodes.worker_count }}
+          K8S_DATA_NODE_COUNT = {{ k8s_nodes.data_count }}
           K8S_NETWORK_BRIDGE_NAME = "{{ vagrant_vms_bridge.name }}"
           K8S_NODES_NET_PREFIX = "{{ vagrant_vms_bridge.ip.split('.')[:-1] | join('.') }}."
           K8S_DOMAIN = "{{ k8s_nodes.domain }}"

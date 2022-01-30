@@ -1,0 +1,39 @@
+---
+
+- hosts: k8s-workers
+  become: true
+  tasks:
+    - name: remove rsyslog configs
+      file:
+        path: "/etc/rsyslog.d/{{ item }}"
+        state: absent
+      loop:
+        - 30-sneakpeek.conf
+
+    - name: remove bpf maps
+      shell: >
+        rm /sys/fs/bpf/*
+      failed_when: false
+
+    - name: remove systemd unit templates
+      file:
+        path: "/etc/systemd/system/{{ item }}"
+        state: absent
+      loop:
+        - "tcptracer@.service"
+        - "execsnoop@.service"
+        - "execsnoops.target"
+        - "tcptracer.target"
+
+    - name: remove cronjob
+      cron:
+        name: "clean sneakpeek bpfmaps"
+        state: absent
+
+    - name: remove caller scripts
+      file:
+        path: /usr/local/bin/sneakpeek/
+        state: "{{ item }}"
+      loop:
+        - absent
+        - directory
